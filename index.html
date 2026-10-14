@@ -40,11 +40,14 @@ button{font:inherit;color:inherit;border:0;cursor:pointer;background:none}
 /* 배틀 */
 #battle{background:radial-gradient(ellipse at center,#22604a 0%,#173b30 70%,#10261f 100%)}
 .binfo{display:flex;justify-content:space-between;align-items:center;padding:5px 10px;font-size:13px;background:rgba(0,0,0,.25)}
-.pts{color:var(--gold);letter-spacing:2px;font-size:15px}
-.brow{display:flex;gap:6px;justify-content:center;padding:4px 0}
-.slot{width:70px;height:92px;border:2px dashed rgba(255,255,255,.15);border-radius:10px}
+.pts{color:var(--gold);font-size:14px;font-weight:800}
+.gxm{font-size:10px;font-weight:900;background:linear-gradient(90deg,#ffd54f,#ff7043);color:#3a1500;border-radius:5px;padding:1px 4px}
+.gxm.used{background:#555;color:#999;text-decoration:line-through}
+.atk.gxa{background:linear-gradient(90deg,#fff3c4,#ffe0cc)}
+.brow{display:flex;gap:5px;justify-content:center;padding:4px 0}
+.slot{width:64px;height:84px;border:2px dashed rgba(255,255,255,.15);border-radius:10px}
 .slot.big{width:100px;height:130px}
-.mon{position:relative;width:70px;height:92px;border-radius:10px;background:#fff;color:#222;border:3px solid var(--tc);overflow:hidden;display:flex;flex-direction:column;cursor:pointer}
+.mon{position:relative;width:64px;height:84px;border-radius:10px;background:#fff;color:#222;border:3px solid var(--tc);overflow:hidden;display:flex;flex-direction:column;cursor:pointer}
 .mon.big{width:100px;height:130px}
 .mon img{width:100%;flex:1;object-fit:contain;min-height:0;background:linear-gradient(#fff,var(--tcl))}
 .mon .nm{font-size:10px;font-weight:800;text-align:center;white-space:nowrap;overflow:hidden;padding:0 2px}
@@ -223,9 +226,9 @@ button{font:inherit;color:inherit;border:0;cursor:pointer;background:none}
 <script>
 // ================= 설정값 (여기 숫자만 바꾸면 규칙이 바뀜) =================
 const LIMIT={deck:60, energy:20, trainer:20, magic:30, trap:30, legend:3, copy:4, etypes:3};
-const WIN_POINTS=3;      // 이 점수 먼저 따면 승리 (일반 기절 1점, ex·전설 2점)
+const PRIZES=6;          // 사이드 카드 수 (다 가져가면 승리 · 일반 기절 1장, GX 기절 2장)
 const HAND_START=7;      // 처음 뽑는 카드 수
-const BENCH_MAX=3;       // 벤치 칸 수
+const BENCH_MAX=5;       // 벤치 칸 수
 const PACK_COST=100;     // 카드팩 가격 (크리스탈)
 const PACK_SIZE=5;       // 팩 하나에 든 카드 수
 const START_CRYSTAL=200; // 처음 주는 크리스탈
@@ -245,88 +248,94 @@ const ART=n=>'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/p
 
 const CARDS=[], C={}, BYNAME={};
 function P(id,name,dex,type,hp,stage,from,rar,ret,atks,o={}){
-  const c={id,kind:'poke',name,dex,type,hp,stage,from,rar,ret,weak:o.weak||WEAK[type],ex:!!o.ex,legend:!!o.legend,
-    atks:atks.map(a=>({name:a[0],cost:a[1],dmg:a[2],eff:a[3]||null}))};
+  if(o.gx) atks=[...atks,[...o.gx.slice(0,3),o.gx[3]||null,true]];
+  const c={id,kind:'poke',name,dex,type,hp,stage,from,rar,ret,weak:o.weak||WEAK[type],gx:!!o.gx,legend:!!o.legend,
+    atks:atks.map(a=>({name:a[0],cost:a[1],dmg:a[2],eff:a[3]||null,gx:!!a[4]}))};
   CARDS.push(c); C[id]=c; if(!BYNAME[name]) BYNAME[name]=c;
 }
 function X(id,kind,name,icon,rar,txt,o={}){const c={id,kind,name,icon,rar,txt,...o};CARDS.push(c);C[id]=c;}
 
+// 기술은 에너지 1개 · 2개 · 3개짜리 하나씩. GX 포켓몬은 GX 기술이 하나 더 있음 (한 판에 1번)
 // --- 풀 ---
-P('bulbasaur','이상해씨',1,'G',70,0,null,1,1,[['덩굴채찍','G',20]]);
-P('ivysaur','이상해풀',2,'G',90,1,'이상해씨',2,2,[['잎날가르기','GC',40]]);
-P('venusaur','이상해꽃',3,'G',160,2,'이상해풀',3,3,[['메가드레인','GGCC',80,{heal:30}]]);
-P('caterpie','캐터피',10,'G',50,0,null,1,1,[['벌레먹음','G',20]]);
-P('metapod','단데기',11,'G',80,1,'캐터피',1,2,[['단단해지기','C',0,{shield:40}]]);
-P('butterfree','버터플',12,'G',120,2,'단데기',2,1,[['수면가루','G',20,{sleep:1}],['은빛바람','GGC',70]]);
-P('oddish','뚜벅쵸',43,'G',60,0,null,1,1,[['독가루','G',10,{poison:1}]]);
-P('gloom','냄새꼬',44,'G',90,1,'뚜벅쵸',2,1,[['독가루폭탄','GC',30,{poison:1}]]);
-P('celebi','셀레비',251,'G',110,0,null,4,1,[['시간의꽃','GG',50,{healTeam:20}]],{legend:1});
+P('bulbasaur','이상해씨',1,'G',70,0,null,1,1,[['몸통박치기','C',10],['덩굴채찍','GC',30],['씨폭탄','GGC',50]]);
+P('ivysaur','이상해풀',2,'G',90,1,'이상해씨',2,2,[['덩굴채찍','G',20],['잎날가르기','GC',50],['솔라빔','GGC',80]]);
+P('venusaur','이상해꽃',3,'G',160,2,'이상해풀',3,3,[['독가루','G',30,{poison:1}],['메가드레인','GC',70,{heal:30}],['솔라빔','GGC',130]]);
+P('caterpie','캐터피',10,'G',50,0,null,1,1,[['실뿜기','G',10,{para:'coin'}],['벌레먹음','GC',30],['벌레의야단법석','GGC',50]]);
+P('metapod','단데기',11,'G',80,1,'캐터피',1,2,[['단단해지기','C',0,{shield:40}],['몸통박치기','GC',40],['철벽돌진','GGC',70]]);
+P('butterfree','버터플',12,'G',120,2,'단데기',2,1,[['수면가루','G',30,{sleep:1}],['은빛바람','GC',60],['폭풍','GGC',110]]);
+P('oddish','뚜벅쵸',43,'G',60,0,null,1,1,[['독가루','G',10,{poison:1}],['흡수','GC',30,{heal:10}],['꽃잎댄스','GGC',60]]);
+P('gloom','냄새꼬',44,'G',90,1,'뚜벅쵸',2,1,[['독가루','G',20,{poison:1}],['메가드레인','GC',50,{heal:20}],['꽃잎댄스','GGC',90]]);
+P('celebi','셀레비',251,'G',110,0,null,4,1,[['시간의꽃','G',20,{healTeam:20}],['리프스톰','GC',60],['파워윕','GGC',100]],{legend:1});
 // --- 불꽃 ---
-P('charmander','파이리',4,'R',60,0,null,1,1,[['불꽃세례','R',20]]);
-P('charmeleon','리자드',5,'R',90,1,'파이리',2,1,[['불꽃엄니','RC',50]]);
-P('charizard','리자몽',6,'R',150,2,'리자드',3,2,[['블래스트번','RRCC',140,{discard:2}]]);
-P('charizardex','리자몽ex',6,'R',180,2,'리자드',4,2,[['날개치기','RC',60],['크림슨스톰','RRRC',200,{discard:2}]],{ex:1});
-P('vulpix','식스테일',37,'R',60,0,null,1,1,[['도깨비불','R',10,{burn:1}]]);
-P('ninetales','나인테일',38,'R',100,1,'식스테일',2,1,[['괴이한불꽃','RR',60,{burn:1}]]);
-P('growlithe','가디',58,'R',70,0,null,1,1,[['물기','RC',30]]);
-P('arcanine','윈디',59,'R',130,1,'가디',3,2,[['신속','C',30],['플레어드라이브','RRRC',150,{recoil:30}]]);
-P('moltres','파이어',146,'R',130,0,null,4,2,[['열풍','RRC',70,{benchAll:10}]],{legend:1});
+P('charmander','파이리',4,'R',60,0,null,1,1,[['할퀴기','C',10],['불꽃세례','RC',30],['베어가르기','RRC',50]]);
+P('charmeleon','리자드',5,'R',90,1,'파이리',2,1,[['불꽃세례','R',20],['불꽃엄니','RC',50],['베어가르기','RRC',80]]);
+P('charizard','리자몽',6,'R',150,2,'리자드',3,2,[['날개치기','R',30],['화염방사','RC',80],['블래스트번','RRC',140,{discard:2}]]);
+P('charizardgx','리자몽GX',6,'R',230,2,'리자드',4,2,[['날개치기','R',40],['화염방사','RC',90],['크림슨스톰','RRC',180,{discard:2}]],{gx:['헬파이어GX','RRC',250,{discard:3}]});
+P('vulpix','식스테일',37,'R',60,0,null,1,1,[['도깨비불','R',10,{burn:1}],['불꽃세례','RC',30],['화염방사','RRC',50]]);
+P('ninetales','나인테일',38,'R',100,1,'식스테일',2,1,[['도깨비불','R',20,{burn:1}],['괴이한불꽃','RC',60],['화염의소용돌이','RRC',90]]);
+P('growlithe','가디',58,'R',70,0,null,1,1,[['물기','C',10],['불꽃엄니','RC',30],['화염방사','RRC',60]]);
+P('arcanine','윈디',59,'R',130,1,'가디',3,2,[['신속','C',30],['불꽃엄니','RC',60],['플레어드라이브','RRC',130,{recoil:30}]]);
+P('moltres','파이어',146,'R',130,0,null,4,2,[['불꽃세례','R',30],['열풍','RC',50,{benchAll:10}],['불새','RRC',110]],{legend:1});
 // --- 물 ---
-P('squirtle','꼬부기',7,'W',60,0,null,1,1,[['물대포','W',20]]);
-P('wartortle','어니부기',8,'W',90,1,'꼬부기',2,1,[['물의파동','WC',40]]);
-P('blastoise','거북왕',9,'W',160,2,'어니부기',3,3,[['하이드로펌프','WWCC',120]]);
-P('magikarp','잉어킹',129,'W',30,0,null,1,1,[['튀어오르기','C',10]]);
-P('gyarados','갸라도스',130,'W',160,1,'잉어킹',3,3,[['파괴광선','WWWC',140]]);
-P('psyduck','고라파덕',54,'W',70,0,null,1,1,[['물튀기기','WC',30]]);
-P('golduck','골덕',55,'W',100,1,'고라파덕',2,1,[['사이코샷','WWC',70,{para:'coin'}]]);
-P('articuno','프리져',144,'W',130,0,null,4,2,[['냉동빔','WWC',60,{para:'coin'}],['눈보라','WWWC',100,{benchAll:10}]],{legend:1});
+P('squirtle','꼬부기',7,'W',60,0,null,1,1,[['몸통박치기','C',10],['물대포','WC',30],['거품광선','WWC',50]]);
+P('wartortle','어니부기',8,'W',90,1,'꼬부기',2,1,[['물대포','W',20],['물의파동','WC',50],['아쿠아테일','WWC',80]]);
+P('blastoise','거북왕',9,'W',160,2,'어니부기',3,3,[['물대포','W',30],['파도타기','WC',80],['하이드로펌프','WWC',130]]);
+P('magikarp','잉어킹',129,'W',30,0,null,1,1,[['튀어오르기','C',0],['몸통박치기','WC',10],['바둥바둥','WWC',20]]);
+P('gyarados','갸라도스',130,'W',160,1,'잉어킹',3,3,[['물기','W',30],['폭포오르기','WC',70],['파괴광선','WWC',130]]);
+P('gyaradosgx','갸라도스GX',130,'W',230,1,'잉어킹',4,3,[['물기','W',40],['아쿠아테일','WC',90],['하이드로펌프','WWC',150]],{gx:['해일GX','WWC',200,{benchAll:20}]});
+P('psyduck','고라파덕',54,'W',70,0,null,1,1,[['머리박기','C',10],['물튀기기','WC',30],['염동력','WWC',50,{para:'coin'}]]);
+P('golduck','골덕',55,'W',100,1,'고라파덕',2,1,[['물대포','W',20],['사이코샷','WC',50,{para:'coin'}],['하이드로펌프','WWC',90]]);
+P('articuno','프리져',144,'W',130,0,null,4,2,[['얼음뭉치','W',30],['냉동빔','WC',60,{para:'coin'}],['눈보라','WWC',100,{benchAll:10}]],{legend:1});
 // --- 전기 ---
-P('pikachu','피카츄',25,'L',60,0,null,1,1,[['전기쇼크','L',20,{para:'coin'}]]);
-P('raichu','라이츄',26,'L',100,1,'피카츄',2,1,[['10만볼트','LLC',100,{discard:1}]]);
-P('pikachuex','피카츄ex',25,'L',120,0,null,4,1,[['서클서킷','LL',30,{perBench:30}]],{ex:1});
-P('voltorb','찌리리공',100,'L',60,0,null,1,1,[['구르기','L',20]]);
-P('electrode','붐볼',101,'L',90,1,'찌리리공',2,1,[['대폭발','LL',130,{recoil:999}]]);
-P('magnemite','코일',81,'L',60,0,null,1,1,[['자기장','L',20]]);
-P('magneton','레어코일',82,'L',90,1,'코일',2,2,[['자석폭탄','LLC',70]]);
-P('zapdos','썬더',145,'L',130,0,null,4,1,[['뇌격','LLC',80,{coinPlus:40}]],{legend:1});
+P('pikachu','피카츄',25,'L',60,0,null,1,1,[['전기쇼크','L',10,{para:'coin'}],['전광석화','LC',30],['10만볼트','LLC',60]]);
+P('raichu','라이츄',26,'L',100,1,'피카츄',2,1,[['전기쇼크','L',30,{para:'coin'}],['10만볼트','LC',60],['번개','LLC',110,{discard:1}]]);
+P('pikachugx','피카츄GX',25,'L',170,0,null,4,1,[['전광석화','L',30],['서클서킷','LC',30,{perBench:30}],['10만볼트','LLC',120]],{gx:['풀볼트GX','LLC',200]});
+P('voltorb','찌리리공',100,'L',60,0,null,1,1,[['구르기','L',10],['스파크','LC',30],['자폭','LLC',70,{recoil:30}]]);
+P('electrode','붐볼',101,'L',90,1,'찌리리공',2,1,[['스파크','L',20],['전기볼','LC',50],['대폭발','LLC',150,{recoil:999}]]);
+P('magnemite','코일',81,'L',60,0,null,1,1,[['자기장','L',10],['전기쇼크','LC',30,{para:'coin'}],['전자포','LLC',60]]);
+P('magneton','레어코일',82,'L',90,1,'코일',2,2,[['자기장','L',20],['전기쇼크','LC',50,{para:'coin'}],['자석폭탄','LLC',90]]);
+P('zapdos','썬더',145,'L',130,0,null,4,1,[['전기쇼크','L',30],['뇌격','LC',60,{coinPlus:30}],['번개','LLC',110]],{legend:1});
 // --- 초 ---
-P('gastly','고오스',92,'P',50,0,null,1,1,[['핥기','P',10,{para:'coin'}]]);
-P('haunter','고우스트',93,'P',80,1,'고오스',2,1,[['최면술','P',20,{sleep:1}]]);
-P('gengar','팬텀',94,'P',140,2,'고우스트',3,1,[['악몽','PP',60,{sleep:1}],['섀도볼','PPC',110]]);
-P('abra','캐이시',63,'P',40,0,null,1,0,[['염동력','P',10]]);
-P('kadabra','윤겔라',64,'P',80,1,'캐이시',2,1,[['사이코키네시스','PC',50]]);
-P('alakazam','후딘',65,'P',140,2,'윤겔라',3,1,[['사이코','PPC',110]]);
-P('mew','뮤',151,'P',90,0,null,4,0,[['신비의힘','PC',50,{draw:2}]],{legend:1});
-P('mewtwoex','뮤츠ex',150,'P',150,0,null,4,2,[['염동탄','PC',50],['사이코드라이브','PPPC',160,{discard:2}]],{ex:1,legend:1});
+P('gastly','고오스',92,'P',50,0,null,1,1,[['핥기','P',10,{para:'coin'}],['나이트헤드','PC',30],['섀도볼','PPC',50]]);
+P('haunter','고우스트',93,'P',80,1,'고오스',2,1,[['최면술','P',10,{sleep:1}],['나이트헤드','PC',50],['섀도볼','PPC',80]]);
+P('gengar','팬텀',94,'P',140,2,'고우스트',3,1,[['악몽','P',30,{sleep:1}],['섀도볼','PC',80],['팬텀나이트','PPC',130]]);
+P('gengargx','팬텀GX',94,'P',230,2,'고우스트',4,1,[['최면술','P',30,{sleep:1}],['섀도볼','PC',90],['섀도다이브','PPC',150]],{gx:['악몽의밤GX','PPC',180,{sleep:1}]});
+P('abra','캐이시',63,'P',40,0,null,1,0,[['염동력','P',10],['사이코키네시스','PC',20],['사이코','PPC',40]]);
+P('kadabra','윤겔라',64,'P',80,1,'캐이시',2,1,[['염동력','P',20],['사이코키네시스','PC',50],['사이코','PPC',80]]);
+P('alakazam','후딘',65,'P',140,2,'윤겔라',3,1,[['사이코키네시스','P',40],['사이코','PC',80],['미래예지','PPC',130]]);
+P('mew','뮤',151,'P',90,0,null,4,0,[['신비의힘','P',20,{draw:2}],['사이코키네시스','PC',50],['변신','PPC',90]],{legend:1});
+P('mewtwogx','뮤츠GX',150,'P',190,0,null,4,2,[['염동탄','P',30],['사이코키네시스','PC',80],['사이코드라이브','PPC',150,{discard:2}]],{legend:1,gx:['사이코스트라이크GX','PPC',200]});
 // --- 격투 ---
-P('machop','알통몬',66,'F',70,0,null,1,1,[['당수','F',20]]);
-P('machoke','근육몬',67,'F',100,1,'알통몬',2,2,[['태권당수','FC',50]]);
-P('machamp','괴력몬',68,'F',160,2,'근육몬',3,3,[['폭발펀치','FFCC',130]]);
-P('riolu','리오르',447,'F',70,0,null,1,1,[['힘껏치기','FC',30]]);
-P('lucario','루카리오',448,'F',120,1,'리오르',3,2,[['파동탄','FFC',80,{coinPlus:30}]]);
-P('geodude','꼬마돌',74,'F',80,0,null,1,2,[['돌던지기','F',20]]);
-P('graveler','데구리',75,'F',100,1,'꼬마돌',2,2,[['바위떨구기','FC',50]]);
-P('golem','딱구리',76,'F',170,2,'데구리',3,4,[['헤비봄버','FFFC',150]]);
+P('machop','알통몬',66,'F',70,0,null,1,1,[['당수','F',10],['태권당수','FC',30],['지옥의바퀴','FFC',60]]);
+P('machoke','근육몬',67,'F',100,1,'알통몬',2,2,[['당수','F',30],['태권당수','FC',60],['크로스촙','FFC',90]]);
+P('machamp','괴력몬',68,'F',160,2,'근육몬',3,3,[['태권당수','F',40],['크로스촙','FC',80],['폭발펀치','FFC',140]]);
+P('riolu','리오르',447,'F',70,0,null,1,1,[['힘껏치기','F',10],['전광석화','FC',30],['발차기','FFC',50]]);
+P('lucario','루카리오',448,'F',120,1,'리오르',3,2,[['힘껏치기','F',30],['파동탄','FC',70],['인파이트','FFC',110]]);
+P('lucariogx','루카리오GX',448,'F',210,1,'리오르',4,2,[['파동탄','F',40],['인파이트','FC',90],['오라스피어','FFC',140]],{gx:['파동의용사GX','FFC',180,{heal:50}]});
+P('geodude','꼬마돌',74,'F',80,0,null,1,2,[['돌던지기','F',10],['구르기','FC',30],['바위떨구기','FFC',60]]);
+P('graveler','데구리',75,'F',100,1,'꼬마돌',2,2,[['돌던지기','F',20],['바위떨구기','FC',50],['지진','FFC',90]]);
+P('golem','딱구리',76,'F',170,2,'데구리',3,4,[['바위떨구기','F',40],['지진','FC',80],['헤비봄버','FFC',140]]);
 // --- 악 ---
-P('murkrow','니로우',198,'D',60,0,null,1,1,[['쪼기','D',20]]);
-P('honchkrow','돈크로우',430,'D',110,1,'니로우',3,1,[['나이트스래시','DC',60,{coinPlus:30}]]);
-P('houndour','델빌',228,'D',60,0,null,1,1,[['물기','D',20]]);
-P('houndoom','헬가',229,'D',110,1,'델빌',2,1,[['악의불꽃','DDC',70,{burn:1}]]);
-P('darkrai','다크라이',491,'D',130,0,null,4,1,[['다크홀','DDC',70,{sleep:1}]],{legend:1});
+P('murkrow','니로우',198,'D',60,0,null,1,1,[['쪼기','D',10],['기습','DC',30],['날개치기','DDC',50]]);
+P('honchkrow','돈크로우',430,'D',110,1,'니로우',3,1,[['기습','D',30],['나이트스래시','DC',60,{coinPlus:30}],['악의파동','DDC',100]]);
+P('houndour','델빌',228,'D',60,0,null,1,1,[['물기','D',10],['불꽃엄니','DC',30],['악의파동','DDC',50]]);
+P('houndoom','헬가',229,'D',110,1,'델빌',2,1,[['물기','D',30],['악의불꽃','DC',60,{burn:1}],['악의파동','DDC',100]]);
+P('darkrai','다크라이',491,'D',130,0,null,4,1,[['기습','D',30],['다크홀','DC',50,{sleep:1}],['악몽','DDC',110]],{legend:1});
 // --- 강철 ---
-P('beldum','메탕',374,'M',60,0,null,1,1,[['돌진','M',20]]);
-P('metang','메탕구',375,'M',90,1,'메탕',2,2,[['메탈클로','MC',50]]);
-P('metagross','메타그로스',376,'M',170,2,'메탕구',3,3,[['코멧펀치','MMCC',140]]);
-P('skarmory','무장조',227,'M',90,0,null,2,1,[['강철날개','MC',40,{shield:20}]]);
+P('beldum','메탕',374,'M',60,0,null,1,1,[['돌진','M',10],['메탈클로','MC',30],['박치기','MMC',50]]);
+P('metang','메탕구',375,'M',90,1,'메탕',2,2,[['돌진','M',20],['메탈클로','MC',50],['코멧펀치','MMC',80]]);
+P('metagross','메타그로스',376,'M',170,2,'메탕구',3,3,[['메탈클로','M',40],['코멧펀치','MC',80],['메탈버스트','MMC',140]]);
+P('skarmory','무장조',227,'M',90,0,null,2,1,[['쪼기','M',20],['강철날개','MC',40,{shield:20}],['에어슬래시','MMC',70]]);
 // --- 무색 ---
-P('rattata','꼬렛',19,'C',40,0,null,1,0,[['필살앞니','C',20]]);
-P('raticate','레트라',20,'C',80,1,'꼬렛',1,1,[['분노의앞니','CC',50]]);
-P('eevee','이브이',133,'C',60,0,null,1,1,[['몸통박치기','C',20]]);
-P('snorlax','잠만보',143,'C',150,0,null,3,4,[['헤비봄버','CCCC',100]]);
-P('dratini','미뇽',147,'C',60,0,null,1,1,[['용의숨결','C',20]]);
-P('dragonair','신뇽',148,'C',90,1,'미뇽',2,2,[['용의파동','CC',50]]);
-P('dragonite','망나뇽',149,'C',170,2,'신뇽',3,2,[['역린','WLCC',170]]);
-P('lugia','루기아',249,'C',140,0,null,4,2,[['에어로블라스트','CCCC',130]],{legend:1});
+P('rattata','꼬렛',19,'C',40,0,null,1,0,[['필살앞니','C',10],['물기','CC',20],['분노의앞니','CCC',40]]);
+P('raticate','레트라',20,'C',80,1,'꼬렛',1,1,[['필살앞니','C',20],['물기','CC',50],['분노의앞니','CCC',80]]);
+P('eevee','이브이',133,'C',60,0,null,1,1,[['몸통박치기','C',10],['전광석화','CC',30],['비밀의힘','CCC',50]]);
+P('snorlax','잠만보',143,'C',150,0,null,3,4,[['하품','C',0,{sleep:1}],['누르기','CC',60,{para:'coin'}],['헤비봄버','CCC',110]]);
+P('dratini','미뇽',147,'C',60,0,null,1,1,[['용의숨결','C',10],['휘감기','CC',30,{para:'coin'}],['용의파동','CCC',50]]);
+P('dragonair','신뇽',148,'C',90,1,'미뇽',2,2,[['휘감기','C',20,{para:'coin'}],['용의파동','CC',50],['드래곤테일','CCC',80]]);
+P('dragonite','망나뇽',149,'C',170,2,'신뇽',3,2,[['날개치기','C',40],['용의파동','WL',90],['역린','WLC',150]]);
+P('dragonitegx','망나뇽GX',149,'C',240,2,'신뇽',4,2,[['드래곤클로','C',50],['용의파동','WL',100],['역린','WLC',160]],{gx:['드래곤러시GX','WLC',230]});
+P('lugia','루기아',249,'C',140,0,null,4,2,[['바람일으키기','C',30],['에어슬래시','CC',70],['에어로블라스트','CCC',120]],{legend:1});
 
 // --- 트레이너 (사람 카드, 턴에 1장) ---
 X('ash','trainer','지우','🧢',2,'카드를 3장 뽑는다.');
@@ -360,13 +369,13 @@ const OPPS=[
  {id:'kid',name:'반바지 꼬마',icon:'👦',lv:'쉬움',reward:30,etypes:['G'],
   cards:{rattata:4,raticate:3,caterpie:4,metapod:3,butterfree:2,eevee:4,oddish:4,gloom:3,dratini:3,dragonair:2,ash:3,brock:3,pokeball:4,potion:4,switch:2,wall:2}},
  {id:'sabrina',name:'나츠메',icon:'🔮',lv:'보통',reward:40,etypes:['P'],
-  cards:{gastly:4,haunter:3,gengar:2,abra:4,kadabra:3,alakazam:2,mew:1,mewtwoex:1,ash:4,oak:2,rocket:2,pokeball:4,candy:2,switch:3,potion:3,fullheal:1,dodge:2,paratrap:2,counter:1}},
+  cards:{gastly:4,haunter:3,gengar:1,gengargx:1,abra:4,kadabra:3,alakazam:2,mew:1,mewtwogx:1,ash:4,oak:2,rocket:2,pokeball:4,candy:2,switch:3,potion:3,fullheal:1,dodge:2,paratrap:2,counter:1}},
  {id:'blaine',name:'카츠라',icon:'🔥',lv:'어려움',reward:60,etypes:['R'],
-  cards:{charmander:4,charmeleon:3,charizard:2,vulpix:4,ninetales:3,growlithe:4,arcanine:2,moltres:1,ash:4,oak:2,gary:2,pokeball:4,switch:2,potion:3,xattack:2,candy:1,mirror:2,wall:2}},
+  cards:{charmander:4,charmeleon:3,charizard:1,charizardgx:1,vulpix:4,ninetales:3,growlithe:4,arcanine:2,moltres:1,ash:4,oak:2,gary:2,pokeball:4,switch:2,potion:3,xattack:2,candy:1,mirror:2,wall:2}},
  {id:'surge',name:'마티스',icon:'⚡',lv:'어려움',reward:60,etypes:['L'],
-  cards:{pikachu:4,raichu:3,pikachuex:1,voltorb:4,electrode:2,magnemite:4,magneton:3,zapdos:1,ash:4,rocket:2,gary:2,pokeball:4,switch:3,potion:3,xattack:2,paratrap:2,counter:2}},
+  cards:{pikachu:4,raichu:3,pikachugx:1,voltorb:4,electrode:2,magnemite:4,magneton:3,zapdos:1,ash:4,rocket:2,gary:2,pokeball:4,switch:3,potion:3,xattack:2,paratrap:2,counter:2}},
  {id:'red',name:'챔피언 레드',icon:'🧢',lv:'최강',reward:120,etypes:['W','F'],
-  cards:{squirtle:4,wartortle:3,blastoise:2,machop:4,machoke:3,machamp:2,riolu:3,lucario:2,snorlax:2,articuno:1,lugia:1,ash:4,oak:2,brock:2,gary:2,pokeball:4,candy:2,switch:2,potion:3,wall:2,mirror:2}},
+  cards:{squirtle:4,wartortle:3,blastoise:2,machop:4,machoke:3,machamp:2,riolu:3,lucario:1,lucariogx:1,snorlax:2,articuno:1,lugia:1,ash:4,oak:2,brock:2,gary:2,pokeball:4,candy:2,switch:2,potion:3,wall:2,mirror:2}},
 ];
 function oppDeck(o){ // 모자란 칸은 에너지 카드로 채움
   const d={...o.cards}; let n=Object.values(d).reduce((a,b)=>a+b,0), i=0;
@@ -382,7 +391,7 @@ const MISSIONS=[
  {id:'ko50',name:'포켓몬 50마리 쓰러뜨리기',goal:50,v:s=>s.st.kos,r:300},
  {id:'evo10',name:'진화 10번 하기',goal:10,v:s=>s.st.evo,r:100},
  {id:'trap5',name:'함정 카드 5번 발동',goal:5,v:s=>s.st.traps,r:100},
- {id:'big1',name:'ex·전설 포켓몬으로 쓰러뜨리기',goal:1,v:s=>s.st.big,r:100},
+ {id:'big1',name:'GX·전설 포켓몬으로 쓰러뜨리기',goal:1,v:s=>s.st.big,r:100},
  {id:'pack3',name:'카드팩 3개 까기',goal:3,v:s=>s.st.packs,r:100},
  {id:'deck',name:'덱을 직접 저장하기',goal:1,v:s=>s.st.saved,r:50},
  {id:'beat3',name:'서로 다른 상대 3명 이기기',goal:3,v:s=>Object.keys(s.st.beat).length,r:200},
@@ -396,7 +405,10 @@ function defSave(){
   const col={}; for(const [id,n] of Object.entries(STARTER)) if(C[id].kind!=='energy') col[id]=n;
   return {cr:START_CRYSTAL,col,deck:{...STARTER},etypes:[...STARTER_E],st:{wins:0,kos:0,evo:0,traps:0,big:0,packs:0,saved:0,beat:{}},claimed:{}};
 }
-function load(){ try{S=JSON.parse(localStorage.getItem(SKEY));}catch(e){S=null} if(!S||!S.col) S=defSave(); }
+const RENAME={charizardex:'charizardgx',pikachuex:'pikachugx',mewtwoex:'mewtwogx'}; // ex → GX 로 바뀐 카드
+function load(){ try{S=JSON.parse(localStorage.getItem(SKEY));}catch(e){S=null} if(!S||!S.col) S=defSave();
+  for(const box of [S.col,S.deck]) for(const [o,n] of Object.entries(RENAME)) if(box[o]){ box[n]=(box[n]||0)+box[o]; delete box[o]; }
+  for(const box of [S.col,S.deck]) for(const id of Object.keys(box)) if(!C[id]) delete box[id]; }
 function save(){ try{localStorage.setItem(SKEY,JSON.stringify(S));}catch(e){} }
 load();
 
@@ -432,14 +444,14 @@ function effText(e){ if(!e) return ''; const o=[];
 function bigCardHTML(c,m){
   const col=colorOf(c);
   if(c.kind==='poke'){
-    const tag=c.legend?' ★전설':'', ex=c.ex?' ex':'';
+    const tag=(c.gx?' · GX':'')+(c.legend?' ★전설':'');
     return `<div class="bigcard" style="--tc:${col.c};--tcl:${col.l}">
       <div class="hd"><div><small>${STAGE[c.stage]}${c.from?' · '+c.from+'에서 진화':''}${tag}</small>${c.name}</div><div>HP ${c.hp} ${eIco(c.type,1)}</div></div>
       <div class="art"><img src="${ART(c.dex)}" onerror="this.replaceWith('${T[c.type].e}')"></div>
-      ${c.atks.map(a=>`<div class="atk"><div class="row">${costHTML(a.cost)} <span>${a.name}</span><span class="dm">${a.dmg||''}</span></div>${a.eff?`<div class="tx">${effText(a.eff)}</div>`:''}</div>`).join('')}
+      ${c.atks.map(a=>`<div class="atk${a.gx?' gxa':''}"><div class="row">${costHTML(a.cost)} <span>${a.name}</span><span class="dm">${a.dmg||''}</span></div>${a.eff||a.gx?`<div class="tx">${a.gx?'GX 기술: 한 판에 1번만 (내 GX 포켓몬 통틀어)'+(a.eff?' · ':''):''}${effText(a.eff)}</div>`:''}</div>`).join('')}
       ${m?`<div class="now">남은 HP <b>${c.hp-m.dmg}</b> · 붙은 에너지 ${m.energy.map(e=>eIco(e.t)).join('')||'없음'}${m.status?' · '+ST[m.status]:''}</div>`:''}
       <div class="ft"><span>약점 ${eIco(c.weak)} +${WEAK_BONUS}</span><span>후퇴 ${c.ret?costHTML('C'.repeat(c.ret)):'없음'}</span><span class="rar">${rarTxt(c.rar)}</span></div>
-      ${(c.ex||c.legend)?'<div class="ft"><span>기절하면 상대가 2점을 얻는다</span></div>':''}
+      ${c.gx?'<div class="ft"><span>GX 포켓몬이 기절하면 상대가 사이드를 2장 가져간다</span></div>':''}
     </div>`;
   }
   const kind=c.kind==='energy'?'에너지':KIND[c.kind];
@@ -452,7 +464,7 @@ function bigCardHTML(c,m){
 function handCardHTML(c,dim){
   const col=colorOf(c);
   const pic=c.kind==='poke'?`<img src="${ART(c.dex)}" loading="lazy" onerror="this.style.visibility='hidden'">`:`<div class="ic">${c.icon}</div>`;
-  const kd=c.kind==='poke'?(c.stage?STAGE[c.stage]:'기본')+(c.legend?'★':c.ex?' ex':''):KIND[c.kind];
+  const kd=c.kind==='poke'?(c.stage?STAGE[c.stage]:'기본')+(c.gx?' GX':'')+(c.legend?'★':''):KIND[c.kind];
   return `<div class="hc${dim?' dim':''}" data-uid="${c.uid||''}" data-id="${c.id}" style="--tc:${col.c};--tcl:${col.l}"><span class="kd">${kd}</span>${pic}<div class="nm">${c.name}</div></div>`;
 }
 
@@ -493,7 +505,7 @@ async function pickOpp(i){
 const ME=0, AI=1;
 let G=null, UID=0, chooser=null;
 function expand(map){const out=[];for(const [id,n] of Object.entries(map)) for(let i=0;i<n;i++) out.push({...C[id],uid:++UID});return out;}
-function side(deck,etypes,isAI,name){return {name,deck:shuffle(deck),hand:[],discard:[],active:null,bench:[],points:0,etypes:[...etypes],curE:null,eUsed:false,eCardUsed:false,trUsed:false,retreated:false,trapUsed:false,bonus:0,isAI};}
+function side(deck,etypes,isAI,name){return {name,deck:shuffle(deck),hand:[],discard:[],active:null,bench:[],prizes:[],gxUsed:false,etypes:[...etypes],curE:null,eUsed:false,eCardUsed:false,trUsed:false,retreated:false,trapUsed:false,bonus:0,isAI};}
 function newMon(card){return {c:card,dmg:0,energy:[],status:null,played:G.turnNo,evolved:-1,under:[],shield:0,paraTurn:0,uid:++UID,hitAt:0,hitD:0};}
 const mons=s=>s.active?[s.active,...s.bench]:[...s.bench];
 function findMon(uid){for(const s of G.p) for(const m of mons(s)) if(m.uid===uid) return m;return null;}
@@ -518,7 +530,7 @@ function aiSetup(s){
 function placeBasic(s,c){ s.hand.splice(s.hand.indexOf(c),1); const m=newMon(c); if(!s.active) s.active=m; else s.bench.push(m); return m; }
 let setupDone=null;
 async function setupBattle(){
-  for(const s of G.p) dealOpening(s);
+  for(const s of G.p){ dealOpening(s); s.prizes=s.deck.splice(-PRIZES); }
   for(const s of G.p) if(s.isAI) aiSetup(s);
   log('배틀 시작!');
   if(!G.p[ME].isAI){ G.phase='setup'; G.busy=false; render(); await new Promise(r=>setupDone=r); }
@@ -539,7 +551,7 @@ async function startTurn(){
   if(!s.deck.length) return endGame(1-G.cur,`${s.name}의 덱이 다 떨어졌다!`);
   s.hand.push(s.deck.pop());
   s.curE=G.turnNo===1?null:s.etypes[Math.random()*s.etypes.length|0];
-  if(G.turnNo>400) return endGame(G.p[ME].points>=G.p[AI].points?ME:AI,'시간 초과!');
+  if(G.turnNo>400) return endGame(G.p[ME].prizes.length<=G.p[AI].prizes.length?ME:AI,'시간 초과!');
   render();
   await banner(G.cur===ME&&!s.isAI?'내 차례!':`${s.name}의 차례`,650);
   if(s.isAI){ G.busy=true; render(); await aiTurn(G.cur); if(!G.over) await endTurn(); }
@@ -572,6 +584,7 @@ const canPay=(energy,cost)=>lack(energy,cost)===0;
 function canAttack(si,i){
   const s=G.p[si], m=s.active; if(!m||G.phase!=='play'||G.cur!==si||G.turnNo===1) return false;
   if(m.status==='sleep'||m.status==='para') return false;
+  if(m.c.atks[i].gx&&s.gxUsed) return false;
   return canPay(m.energy,m.c.atks[i].cost);
 }
 function canRetreat(si){
@@ -707,8 +720,9 @@ async function trapPhase(di,trig,mod,ctx){
 async function doAttack(si,idx){
   if(!canAttack(si,idx)) return;
   const s=G.p[si], o=G.p[1-si], m=s.active, atk=m.c.atks[idx], e=atk.eff||{};
+  if(atk.gx) s.gxUsed=true;
   log(`${m.c.name}의 ${atk.name}!`); render();
-  await banner(`${m.c.name}의 ${atk.name}!`,650);
+  await banner(atk.gx?`✨ ${m.c.name}의 ${atk.name}! ✨`:`${m.c.name}의 ${atk.name}!`,atk.gx?1100:650);
   let head=false; if(e.coinPlus||e.para==='coin') head=await coin(atk.name);
   const def=o.active;
   const est=calcDmg(s,m,atk,def,head);
@@ -742,16 +756,17 @@ async function checkKOs(){
     const s=G.p[si], o=G.p[1-si];
     for(const m of mons(s)){
       if(m.dmg<m.c.hp) continue;
-      const pts=(m.c.ex||m.c.legend)?2:1; o.points+=pts;
-      log(`💫 ${m.c.name} 기절! ${o.name} +${pts}점`);
-      if(1-si===ME&&G.cur===ME){ stat(ME,'kos'); const a=G.p[ME].active; if(a&&a!==m&&(a.c.ex||a.c.legend)) stat(ME,'big'); }
+      const pts=Math.min(m.c.gx?2:1,o.prizes.length);
+      for(let k=0;k<pts;k++) o.hand.push(o.prizes.pop());
+      log(`💫 ${m.c.name} 기절! ${o.name} 사이드 ${pts}장 획득`);
+      if(1-si===ME&&G.cur===ME){ stat(ME,'kos'); const a=G.p[ME].active; if(a&&a!==m&&(a.c.gx||a.c.legend)) stat(ME,'big'); }
       s.discard.push(m.c,...m.under,...m.energy.filter(e=>e.card).map(e=>e.card));
       if(s.active===m) s.active=null; else s.bench.splice(s.bench.indexOf(m),1);
-      render(); await banner(`💫 ${m.c.name} 기절! (${o.name} +${pts}점)`,850);
+      render(); await banner(`💫 ${m.c.name} 기절! (${o.name} 사이드 ${pts}장)`,850);
     }
   }
-  const a=G.p[ME].points>=WIN_POINTS, b=G.p[AI].points>=WIN_POINTS;
-  if(a||b) return endGame(a&&b?G.cur:a?ME:AI,`${WIN_POINTS}점 달성!`);
+  const a=!G.p[ME].prizes.length, b=!G.p[AI].prizes.length;
+  if(a||b) return endGame(a&&b?G.cur:a?ME:AI,'사이드를 전부 가져갔다!');
   for(const si of [G.cur,1-G.cur]){
     const s=G.p[si]; if(s.active) continue;
     if(!s.bench.length) return endGame(1-si,`${s.name}의 포켓몬이 모두 기절!`);
@@ -761,7 +776,7 @@ async function checkKOs(){
 }
 
 async function endGame(w,reason){
-  if(G.over) return; G.over=true; G.busy=true; G.winner=w; chooser=null;
+  if(G.over) return; G.over=true; G.busy=true; G.winner=w; G.reason=reason; chooser=null;
   const win=w===ME;
   if(G.test) return;
   render(); hidePrompt();
@@ -796,6 +811,7 @@ function bestAttack(si){
     if(o.active&&d>=o.active.c.hp-o.active.dmg) sc+=1000;
     if(d===0) sc=a.eff?5:1;
     if(a.eff&&a.eff.recoil>=999&&sc<1000) sc=0;
+    if(a.gx&&sc<1000) sc-=60;
     if(sc>bs){bs=sc;best=i;} });
   return bs>0?best:null;
 }
@@ -878,20 +894,20 @@ function monHTML(m,big){
   const hit=Date.now()-m.hitAt<700;
   return `<div class="mon${big?' big':''}${pick}${hit?' hit':''}" data-uid="${m.uid}" style="--tc:${t.c};--tcl:${t.l}">
     <img src="${ART(c.dex)}" onerror="this.style.visibility='hidden'">
-    <div class="hpt">${hp}</div>${c.ex||c.legend?`<div class="tag">${c.legend?'★':'ex'}</div>`:''}
+    <div class="hpt">${hp}</div>${c.gx||c.legend?`<div class="tag">${c.gx?'GX':''}${c.legend?'★':''}</div>`:''}
     <div class="ens">${m.energy.map(e=>eIco(e.t)).join('')}</div>
     ${m.status?`<div class="st">${ST[m.status]}</div>`:''}${m.shield?`<div class="sh">🛡${m.shield}</div>`:''}
     <div class="hpb"><i style="width:${pct}%;background:${pct>50?'#43a047':pct>25?'#fbc02d':'#e53935'}"></i></div>
     <div class="nm">${c.name}</div>${hit?`<div class="dpop">-${m.hitD}</div>`:''}</div>`;
 }
 const benchHTML=s=>{let h='';for(let i=0;i<BENCH_MAX;i++) h+=s.bench[i]?monHTML(s.bench[i]):'<div class="slot"></div>';return h;};
-const ptsHTML=n=>'●'.repeat(Math.min(n,WIN_POINTS))+'○'.repeat(Math.max(0,WIN_POINTS-n));
+const ptsHTML=s=>`<span title="사이드">🎴${s.prizes.length}</span> <span class="gxm${s.gxUsed?' used':''}">GX</span>`;
 function myTurn(){ return G&&!G.over&&G.phase==='play'&&G.cur===ME&&!G.busy&&!G.p[ME].isAI; }
 function render(){
   if(!G||G.test) return;
   const me=G.p[ME], op=G.p[AI];
-  $('#oppInfo').innerHTML=`<span>${G.opp.icon} <b>${op.name}</b> ${op.etypes.map(t=>T[t].e).join('')}</span><span class="pts">${ptsHTML(op.points)}</span><span>🂠${op.hand.length} 📚${op.deck.length}</span>`;
-  $('#meInfo').innerHTML=`<span>🙂 <b>나</b> ${me.etypes.map(t=>T[t].e).join('')}</span><span class="pts">${ptsHTML(me.points)}</span><span>📚${me.deck.length} 🗑️${me.discard.length}</span>`;
+  $('#oppInfo').innerHTML=`<span>${G.opp.icon} <b>${op.name}</b> ${op.etypes.map(t=>T[t].e).join('')}</span><span class="pts">${ptsHTML(op)}</span><span>🂠${op.hand.length} 📚${op.deck.length}</span>`;
+  $('#meInfo').innerHTML=`<span>🙂 <b>나</b> ${me.etypes.map(t=>T[t].e).join('')}</span><span class="pts">${ptsHTML(me)}</span><span>📚${me.deck.length} 🗑️${me.discard.length}</span>`;
   $('#oppBench').innerHTML=benchHTML(op);
   $('#oppActive').innerHTML=op.active?monHTML(op.active,true):'<div class="slot big"></div>';
   $('#meActive').innerHTML=me.active?monHTML(me.active,true):'<div class="slot big"></div>';
@@ -953,7 +969,7 @@ async function onMonClick(uid){
   }
   const btns=[];
   if(mine&&myTurn()&&me.active===m){
-    m.c.atks.forEach((a,i)=>btns.push({v:'a'+i,label:`⚔️ ${a.name}${a.dmg?' ('+(calcDmg(me,m,a,G.p[AI].active,false))+')':''}`,dis:!canAttack(ME,i)}));
+    m.c.atks.forEach((a,i)=>btns.push({v:'a'+i,label:`${a.gx?'✨':'⚔️'} ${a.name}${a.dmg?' ('+(calcDmg(me,m,a,G.p[AI].active,false))+')':''}${a.gx&&me.gxUsed?' — 이미 씀':''}`,cls:a.gx?'gold':'',dis:!canAttack(ME,i)}));
     btns.push({v:'r',label:`🏃 후퇴 (에너지 ${m.c.ret}개 버림)`,cls:'gray',dis:!canRetreat(ME)});
     if(G.turnNo===1) btns.unshift({v:null,label:'선공 첫 턴엔 공격 못 해',cls:'gray',dis:true});
   }
@@ -1012,7 +1028,7 @@ function renderDeck(){
   $('#dtabs').innerHTML=tabs.map(([k,l])=>`<button class="tab${dTab===k?' on':''}" onclick="dTab='${k}';renderDeck()">${l}</button>`).join('');
   const list=CARDS.filter(c=>(c.kind==='energy'||S.col[c.id])&&(dTab==='all'||(dTab==='in'?D[c.id]:catOf(c)===dTab)));
   $('#dlist').innerHTML=list.map(c=>{ const k=D[c.id]||0, own=c.kind==='energy'?'∞':S.col[c.id];
-    const sub=c.kind==='poke'?`${T[c.type].e} ${STAGE[c.stage]} · HP ${c.hp}${c.legend?' · ★전설':c.ex?' · ex':''}`:KIND[c.kind];
+    const sub=c.kind==='poke'?`${T[c.type].e} ${STAGE[c.stage]} · HP ${c.hp}${c.gx?' · GX':''}${c.legend?' · ★전설':''}`:KIND[c.kind];
     return `<div class="crow${k?' in':''}"><div onclick="cardInfo('${c.id}')">${handCardHTML(c)}</div>
       <div class="inf" onclick="cardInfo('${c.id}')"><b>${c.name}</b> <span class="rar">${rarTxt(c.rar)}</span><div class="sub">${sub} · 보유 ${own}</div></div>
       <div class="cnt"><button onclick="dAdd('${c.id}',-1)">−</button><b>${k}</b><button onclick="dAdd('${c.id}',1)">+</button></div></div>`; }).join('')||'<p style="color:var(--sub);text-align:center">카드가 없어</p>';
@@ -1083,7 +1099,7 @@ async function autoTest(n=10,oppIdx=null){
   for(let i=0;i<n;i++){
     const opp=OPPS[oppIdx??(i%OPPS.length)];
     try{ await startBattle(opp,{test:true,meDeck:STARTER,meE:STARTER_E}); if(!G.over) throw new Error('끝나지 않음');
-      res[G.winner===ME?'me':'ai']++; res.turns.push(G.turnNo); }
+      res[G.winner===ME?'me':'ai']++; res.turns.push(G.turnNo); res.why=res.why||{}; res.why[G.reason]=(res.why[G.reason]||0)+1; }
     catch(e){ res.errors.push(String(e&&e.stack||e)); }
   }
   SPEED=old; G=null; return res;
