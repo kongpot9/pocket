@@ -43,6 +43,8 @@ button{font:inherit;color:inherit;border:0;cursor:pointer;background:none}
 .pts{color:var(--gold);font-size:14px;font-weight:800}
 .gxm{font-size:10px;font-weight:900;background:linear-gradient(90deg,#ffd54f,#ff7043);color:#3a1500;border-radius:5px;padding:1px 4px}
 .gxm.used{background:#555;color:#999;text-decoration:line-through}
+.abil{padding:6px 10px;border-top:1px solid #eee;background:#fde7e9;font-size:12px;color:#444}
+.abil b{color:#c62828;font-size:14px}
 .atk.gxa{background:linear-gradient(90deg,#fff3c4,#ffe0cc)}
 .brow{display:flex;gap:5px;justify-content:center;padding:4px 0}
 .slot{width:64px;height:84px;border:2px dashed rgba(255,255,255,.15);border-radius:10px}
@@ -249,7 +251,7 @@ const ART=n=>'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/p
 const CARDS=[], C={}, BYNAME={};
 function P(id,name,dex,type,hp,stage,from,rar,ret,atks,o={}){
   if(o.gx) atks=[...atks,[...o.gx.slice(0,3),o.gx[3]||null,true]];
-  const c={id,kind:'poke',name,dex,type,hp,stage,from,rar,ret,weak:o.weak||WEAK[type],gx:!!o.gx,legend:!!o.legend,
+  const c={id,kind:'poke',name,dex,type,hp,stage,from,rar,ret,weak:o.weak||WEAK[type],gx:!!o.gx,legend:!!o.legend,abil:o.abil||null,
     atks:atks.map(a=>({name:a[0],cost:a[1],dmg:a[2],eff:a[3]||null,gx:!!a[4]}))};
   CARDS.push(c); C[id]=c; if(!BYNAME[name]) BYNAME[name]=c;
 }
@@ -329,6 +331,8 @@ P('skarmory','무장조',227,'M',90,0,null,2,1,[['쪼기','M',20],['강철날개
 // --- 무색 ---
 P('rattata','꼬렛',19,'C',40,0,null,1,0,[['필살앞니','C',10],['물기','CC',20],['분노의앞니','CCC',40]]);
 P('raticate','레트라',20,'C',80,1,'꼬렛',1,1,[['필살앞니','C',20],['물기','CC',50],['분노의앞니','CCC',80]]);
+P('meowth','나옹',52,'C',60,0,null,3,1,[['할퀴기','C',10],['고양이돈받기','CC',20,{draw:1}],['마구할퀴기','CCC',40]],
+  {abil:{id:'coinslot',name:'코인 슬롯',txt:'이 포켓몬이 배틀 자리에 있으면, 내 턴마다 1번 ⭐노말 에너지를 내 포켓몬 1마리에게 붙일 수 있다.'}});
 P('eevee','이브이',133,'C',60,0,null,1,1,[['몸통박치기','C',10],['전광석화','CC',30],['비밀의힘','CCC',50]]);
 P('snorlax','잠만보',143,'C',150,0,null,3,4,[['하품','C',0,{sleep:1}],['누르기','CC',60,{para:'coin'}],['헤비봄버','CCC',110]]);
 P('dratini','미뇽',147,'C',60,0,null,1,1,[['용의숨결','C',10],['휘감기','CC',30,{para:'coin'}],['용의파동','CCC',50]]);
@@ -367,7 +371,7 @@ const STARTER_E=['R','W'];
 
 const OPPS=[
  {id:'kid',name:'반바지 꼬마',icon:'👦',lv:'쉬움',reward:30,etypes:['G'],
-  cards:{rattata:4,raticate:3,caterpie:4,metapod:3,butterfree:2,eevee:4,oddish:4,gloom:3,dratini:3,dragonair:2,ash:3,brock:3,pokeball:4,potion:4,switch:2,wall:2}},
+  cards:{meowth:2,rattata:4,raticate:3,caterpie:4,metapod:3,butterfree:2,eevee:4,oddish:4,gloom:3,dratini:3,dragonair:2,ash:3,brock:3,pokeball:4,potion:4,switch:2,wall:2}},
  {id:'sabrina',name:'나츠메',icon:'🔮',lv:'보통',reward:40,etypes:['P'],
   cards:{gastly:4,haunter:3,gengar:1,gengargx:1,abra:4,kadabra:3,alakazam:2,mew:1,mewtwogx:1,ash:4,oak:2,rocket:2,pokeball:4,candy:2,switch:3,potion:3,fullheal:1,dodge:2,paratrap:2,counter:1}},
  {id:'blaine',name:'카츠라',icon:'🔥',lv:'어려움',reward:60,etypes:['R'],
@@ -448,6 +452,7 @@ function bigCardHTML(c,m){
     return `<div class="bigcard" style="--tc:${col.c};--tcl:${col.l}">
       <div class="hd"><div><small>${STAGE[c.stage]}${c.from?' · '+c.from+'에서 진화':''}${tag}</small>${c.name}</div><div>HP ${c.hp} ${eIco(c.type,1)}</div></div>
       <div class="art"><img src="${ART(c.dex)}" onerror="this.replaceWith('${T[c.type].e}')"></div>
+      ${c.abil?`<div class="abil"><b>특성 ✨ ${c.abil.name}</b><div>${c.abil.txt}</div></div>`:''}
       ${c.atks.map(a=>`<div class="atk${a.gx?' gxa':''}"><div class="row">${costHTML(a.cost)} <span>${a.name}</span><span class="dm">${a.dmg||''}</span></div>${a.eff||a.gx?`<div class="tx">${a.gx?'GX 기술: 한 판에 1번만 (내 GX 포켓몬 통틀어)'+(a.eff?' · ':''):''}${effText(a.eff)}</div>`:''}</div>`).join('')}
       ${m?`<div class="now">남은 HP <b>${c.hp-m.dmg}</b> · 붙은 에너지 ${m.energy.map(e=>eIco(e.t)).join('')||'없음'}${m.status?' · '+ST[m.status]:''}</div>`:''}
       <div class="ft"><span>약점 ${eIco(c.weak)} +${WEAK_BONUS}</span><span>후퇴 ${c.ret?costHTML('C'.repeat(c.ret)):'없음'}</span><span class="rar">${rarTxt(c.rar)}</span></div>
@@ -506,7 +511,7 @@ const ME=0, AI=1;
 let G=null, UID=0, chooser=null;
 function expand(map){const out=[];for(const [id,n] of Object.entries(map)) for(let i=0;i<n;i++) out.push({...C[id],uid:++UID});return out;}
 function side(deck,etypes,isAI,name){return {name,deck:shuffle(deck),hand:[],discard:[],active:null,bench:[],prizes:[],gxUsed:false,etypes:[...etypes],curE:null,eUsed:false,eCardUsed:false,trUsed:false,retreated:false,trapUsed:false,bonus:0,isAI};}
-function newMon(card){return {c:card,dmg:0,energy:[],status:null,played:G.turnNo,evolved:-1,under:[],shield:0,paraTurn:0,uid:++UID,hitAt:0,hitD:0};}
+function newMon(card){return {c:card,dmg:0,energy:[],status:null,played:G.turnNo,evolved:-1,under:[],shield:0,paraTurn:0,uid:++UID,hitAt:0,hitD:0,abilTurn:-1};}
 const mons=s=>s.active?[s.active,...s.bench]:[...s.bench];
 function findMon(uid){for(const s of G.p) for(const m of mons(s)) if(m.uid===uid) return m;return null;}
 function ownerOf(m){return G.p.findIndex(s=>mons(s).includes(m));}
@@ -693,6 +698,20 @@ async function retreat(si){
   log(`${s.name}: ${a.c.name} 후퇴 → ${tgt.c.name} 등장`); render(); return true;
 }
 
+function canAbility(si,m){
+  const s=G.p[si]; if(!m||!m.c.abil||G.phase!=='play'||G.cur!==si||m.abilTurn===G.turnNo) return false;
+  if(m.c.abil.id==='coinslot') return s.active===m;
+  return false;
+}
+async function useAbility(si,m){
+  const s=G.p[si]; if(!canAbility(si,m)) return false;
+  if(m.c.abil.id==='coinslot'){
+    const t=await pickMon(si,mons(s),'⭐노말 에너지를 붙일 포켓몬을 골라',x=>energyScore(s,x,'C')+(x===s.active?1:0)); if(!t) return false;
+    t.energy.push({t:'C'}); m.abilTurn=G.turnNo;
+    log(`✨ ${m.c.name}의 코인 슬롯! ⭐에너지 → ${t.c.name}`); render(); await banner(`✨ 코인 슬롯! 🪙`,700);
+  }
+  return true;
+}
 async function trapPhase(di,trig,mod,ctx){
   const d=G.p[di]; if(d.trapUsed) return;
   const traps=d.hand.filter(c=>c.kind==='trap'&&c.trig===trig); if(!traps.length) return;
@@ -868,6 +887,7 @@ async function aiTurn(si){
     }
   }
   // 에너지
+  for(const m of mons(s)) if(canAbility(si,m)){ await useAbility(si,m); await step(); if(G.over) return; }
   if(s.curE&&!s.eUsed&&mons(s).length){ attachAuto(si,aiEnergyTarget(s,s.curE)); await step(); }
   if(!s.eCardUsed){ const ecs=s.hand.filter(c=>c.kind==='energy');
     if(ecs.length){ let pick=null; for(const ec of ecs){ const m=aiEnergyTarget(s,ec.etype,true); if(m){pick=[m,ec];break;} }
@@ -968,16 +988,18 @@ async function onMonClick(uid){
     return render();
   }
   const btns=[];
+  if(mine&&myTurn()&&m.c.abil) btns.push({v:'skill',label:`✨ 특성: ${m.c.abil.name}${m.abilTurn===G.turnNo?' — 이번 턴엔 씀':''}`,cls:'red',dis:!canAbility(ME,m)});
   if(mine&&myTurn()&&me.active===m){
+    if(G.turnNo===1) btns.push({v:null,label:'선공 첫 턴엔 공격 못 해',cls:'gray',dis:true});
     m.c.atks.forEach((a,i)=>btns.push({v:'a'+i,label:`${a.gx?'✨':'⚔️'} ${a.name}${a.dmg?' ('+(calcDmg(me,m,a,G.p[AI].active,false))+')':''}${a.gx&&me.gxUsed?' — 이미 씀':''}`,cls:a.gx?'gold':'',dis:!canAttack(ME,i)}));
     btns.push({v:'r',label:`🏃 후퇴 (에너지 ${m.c.ret}개 버림)`,cls:'gray',dis:!canRetreat(ME)});
-    if(G.turnNo===1) btns.unshift({v:null,label:'선공 첫 턴엔 공격 못 해',cls:'gray',dis:true});
   }
   btns.push({v:null,label:'닫기',cls:'gray'});
   const v=await modal(bigCardHTML(m.c,m),btns,{dismiss:true});
   if(!v) return;
-  if(v[0]==='a') act(async()=>{ await doAttack(ME,+v.slice(1)); if(!G.over) await endTurn(); });
+  if(/^a\d+$/.test(v)) act(async()=>{ const i=+v.slice(1); if(!canAttack(ME,i)) return; await doAttack(ME,i); if(!G.over) await endTurn(); });
   else if(v==='r') act(()=>retreat(ME));
+  else if(v==='skill') act(()=>useAbility(ME,m));
 }
 async function onHandClick(uid){
   const s=G.p[ME], c=s.hand.find(x=>x.uid===uid); if(!c||chooser) return;
