@@ -1,0 +1,1100 @@
+<!doctype html>
+<html lang="ko"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<title>포켓몬 카드 배틀</title>
+<style>
+:root{--bg:#141a2e;--panel:#1f2742;--line:#2f3a5e;--text:#f1f3fa;--sub:#9aa5c7;--gold:#ffd54f;--accent:#4fc3f7}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent;user-select:none;-webkit-user-select:none}
+html,body{margin:0;height:100%;background:var(--bg);color:var(--text);font-family:system-ui,-apple-system,"Apple SD Gothic Neo","Malgun Gothic",sans-serif;touch-action:manipulation;overflow:hidden}
+#app{max-width:480px;margin:0 auto;height:100%;position:relative;overflow:hidden}
+.screen{position:absolute;inset:0;display:none;flex-direction:column}
+.screen.on{display:flex}
+button{font:inherit;color:inherit;border:0;cursor:pointer;background:none}
+.btn{background:var(--accent);color:#0b1630;font-weight:800;border-radius:12px;padding:11px 16px;font-size:15px}
+.btn.gray{background:#3a4566;color:var(--text)}
+.btn.red{background:#e53935;color:#fff}
+.btn.gold{background:var(--gold);color:#3a2a00}
+.btn:disabled{opacity:.35}
+.top{display:flex;align-items:center;gap:8px;padding:10px 12px;background:var(--panel);border-bottom:1px solid var(--line)}
+.top h2{flex:1;margin:0;font-size:18px}
+.cr{color:var(--gold);font-weight:900}
+.scroll{flex:1;overflow-y:auto;padding:12px}
+
+/* 홈 */
+#home{align-items:center;justify-content:center;gap:12px;padding:20px;background:radial-gradient(circle at 50% 30%,#2b3a74,#141a2e 70%)}
+#home h1{font-size:30px;margin:0;text-align:center;line-height:1.2}
+#home h1 small{display:block;font-size:13px;color:var(--sub);font-weight:600;margin-top:6px}
+#home .cr{font-size:20px;margin-bottom:10px}
+.menu{display:flex;flex-direction:column;gap:10px;width:100%;max-width:300px}
+.menu .btn{font-size:18px;padding:15px;position:relative}
+.badge{position:absolute;top:-6px;right:-6px;background:#e53935;color:#fff;border-radius:10px;font-size:12px;padding:2px 7px}
+
+/* 상대 선택 */
+.opp{display:flex;align-items:center;gap:12px;background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:12px;margin-bottom:10px;width:100%;text-align:left}
+.opp .ic{font-size:34px}
+.opp b{font-size:17px}
+.opp .sub{color:var(--sub);font-size:13px}
+.opp .rw{margin-left:auto;text-align:right;font-size:13px}
+
+/* 배틀 */
+#battle{background:radial-gradient(ellipse at center,#22604a 0%,#173b30 70%,#10261f 100%)}
+.binfo{display:flex;justify-content:space-between;align-items:center;padding:5px 10px;font-size:13px;background:rgba(0,0,0,.25)}
+.pts{color:var(--gold);letter-spacing:2px;font-size:15px}
+.brow{display:flex;gap:6px;justify-content:center;padding:4px 0}
+.slot{width:70px;height:92px;border:2px dashed rgba(255,255,255,.15);border-radius:10px}
+.slot.big{width:100px;height:130px}
+.mon{position:relative;width:70px;height:92px;border-radius:10px;background:#fff;color:#222;border:3px solid var(--tc);overflow:hidden;display:flex;flex-direction:column;cursor:pointer}
+.mon.big{width:100px;height:130px}
+.mon img{width:100%;flex:1;object-fit:contain;min-height:0;background:linear-gradient(#fff,var(--tcl))}
+.mon .nm{font-size:10px;font-weight:800;text-align:center;white-space:nowrap;overflow:hidden;padding:0 2px}
+.mon.big .nm{font-size:12px}
+.mon .hpb{height:5px;background:#ddd}
+.mon .hpb i{display:block;height:100%}
+.mon .hpt{position:absolute;top:2px;right:2px;font-size:11px;font-weight:900;background:rgba(255,255,255,.9);border-radius:6px;padding:0 3px}
+.mon .tag{position:absolute;top:18px;right:2px;font-size:10px;font-weight:900;background:#222;color:var(--gold);border-radius:5px;padding:0 3px}
+.mon .ens{position:absolute;left:2px;top:2px;display:flex;flex-wrap:wrap;gap:1px;max-width:62%}
+.mon .st{position:absolute;bottom:22px;left:2px;font-size:10px;background:#222;color:#fff;border-radius:6px;padding:0 4px}
+.mon .sh{position:absolute;bottom:22px;right:2px;font-size:10px;background:#1565c0;color:#fff;border-radius:6px;padding:0 3px}
+.mon.pick{box-shadow:0 0 0 3px #ffeb3b,0 0 18px #ffeb3b;animation:pulse .7s infinite alternate}
+.mon.hit{animation:shake .4s}
+.dpop{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:24px;font-weight:900;color:#e53935;text-shadow:0 0 4px #fff,0 0 4px #fff;pointer-events:none}
+@keyframes pulse{to{box-shadow:0 0 0 3px #fff59d,0 0 6px #fff59d}}
+@keyframes shake{25%{transform:translateX(-5px)}50%{transform:translateX(5px)}75%{transform:translateX(-3px)}}
+.eico{width:15px;height:15px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:9px;background:var(--ec);border:1px solid rgba(0,0,0,.35);flex:0 0 auto}
+.eico.lg{width:22px;height:22px;font-size:13px}
+.mid{display:flex;align-items:center;gap:8px;padding:4px 10px;min-height:52px}
+#log{flex:1;font-size:12px;line-height:1.35;color:#e8fff4;text-shadow:0 1px 2px #000;overflow:hidden;max-height:48px}
+#log div:last-child{font-weight:800;color:#fff}
+#ezone{width:48px;height:48px;border-radius:50%;border:2px dashed rgba(255,255,255,.4);display:flex;align-items:center;justify-content:center;font-size:24px;flex:0 0 auto;position:relative}
+#ezone.on{border:3px solid #fff;background:var(--ec);animation:pulse .8s infinite alternate}
+#ezone .lb{position:absolute;bottom:-14px;font-size:9px;color:#cfe;white-space:nowrap}
+#endBtn{padding:10px 12px;font-size:14px}
+.bspacer{flex:1}
+#hand{display:flex;gap:6px;overflow-x:auto;padding:8px;background:rgba(0,0,0,.4);min-height:110px;align-items:center}
+.hc{flex:0 0 64px;height:92px;border-radius:9px;background:#fff;color:#222;border:3px solid var(--tc);display:flex;flex-direction:column;overflow:hidden;position:relative;cursor:pointer}
+.hc img{flex:1;min-height:0;object-fit:contain;width:100%;background:var(--tcl)}
+.hc .ic{flex:1;display:flex;align-items:center;justify-content:center;font-size:28px;background:var(--tcl)}
+.hc .nm{font-size:10px;font-weight:800;text-align:center;padding:1px 2px;white-space:nowrap;overflow:hidden}
+.hc .kd{position:absolute;top:1px;left:1px;font-size:8px;font-weight:900;color:#fff;background:var(--tc);border-radius:4px;padding:0 3px}
+.hc.dim{opacity:.55}
+#prompt{position:absolute;left:8px;right:8px;top:42%;background:rgba(10,20,40,.92);border:2px solid #ffeb3b;border-radius:12px;padding:10px;display:none;align-items:center;gap:8px;z-index:20;font-weight:800;font-size:14px}
+#prompt.on{display:flex}
+#prompt span{flex:1}
+#setupBar{display:none;padding:6px 10px;gap:8px;align-items:center;background:rgba(0,0,0,.5);font-size:13px}
+#setupBar.on{display:flex}
+#setupBar span{flex:1}
+#banner{position:absolute;left:0;right:0;top:40%;text-align:center;font-size:24px;font-weight:900;padding:14px;background:linear-gradient(90deg,transparent,rgba(0,0,0,.75),transparent);text-shadow:0 2px 4px #000;display:none;z-index:30;pointer-events:none}
+#banner.on{display:block}
+#coin{position:absolute;inset:0;display:none;align-items:center;justify-content:center;flex-direction:column;background:rgba(0,0,0,.45);z-index:31;font-weight:900;font-size:18px;gap:8px;pointer-events:none}
+#coin.on{display:flex}
+#coin .c{font-size:64px}
+
+/* 모달 · 카드 */
+#modal{position:absolute;inset:0;background:rgba(0,0,0,.6);display:none;align-items:center;justify-content:center;z-index:50;padding:14px}
+#modal.on{display:flex}
+.mbox{display:flex;flex-direction:column;align-items:center;gap:10px;max-height:100%;overflow-y:auto;width:100%}
+.mbtns{display:flex;flex-direction:column;gap:6px;width:260px}
+.mtext{background:var(--panel);border-radius:14px;padding:16px;text-align:center;font-size:16px;line-height:1.5;width:280px}
+.bigcard{width:260px;border-radius:16px;background:#fff;color:#222;border:6px solid var(--tc);overflow:hidden;flex:0 0 auto}
+.bigcard .hd{display:flex;justify-content:space-between;align-items:center;padding:6px 10px;background:var(--tcl);font-weight:900;font-size:16px}
+.bigcard .hd small{font-size:11px;color:#555;font-weight:700;display:block}
+.bigcard .art{height:140px;display:flex;align-items:center;justify-content:center;background:linear-gradient(#fff,var(--tcl));font-size:70px}
+.bigcard .art img{height:132px}
+.atk{padding:6px 10px;border-top:1px solid #eee}
+.atk .row{display:flex;align-items:center;gap:3px;font-weight:800;font-size:15px}
+.atk .row .dm{margin-left:auto;font-size:18px}
+.atk .tx{font-size:12px;color:#555;margin-top:2px}
+.bigcard .txt{padding:10px;font-size:14px;line-height:1.5}
+.bigcard .ft{font-size:11px;color:#555;padding:6px 10px;display:flex;justify-content:space-between;border-top:1px solid #eee;align-items:center}
+.bigcard .now{font-size:12px;padding:6px 10px;background:#f6f6f6;border-top:1px solid #eee;display:flex;gap:4px;align-items:center;flex-wrap:wrap}
+.rar{color:#b8860b;font-size:11px}
+
+/* 덱 편집 */
+.dsum{display:flex;flex-wrap:wrap;gap:4px 10px;padding:8px 12px;font-size:12px;background:#18203a;border-bottom:1px solid var(--line)}
+.dsum b.bad{color:#ff6b6b}
+.dsum b.ok{color:#7ee787}
+.etrow{display:flex;align-items:center;gap:4px;padding:6px 12px;font-size:12px;flex-wrap:wrap}
+.etb{width:30px;height:30px;border-radius:50%;background:#2a3355;font-size:15px;opacity:.45;border:2px solid transparent}
+.etb.on{opacity:1;background:var(--ec);border-color:#fff}
+.tabs{display:flex;gap:4px;padding:6px 12px;overflow-x:auto}
+.tab{padding:6px 10px;border-radius:16px;background:#2a3355;font-size:13px;white-space:nowrap}
+.tab.on{background:var(--accent);color:#0b1630;font-weight:800}
+.crow{display:flex;align-items:center;gap:8px;padding:6px;border-bottom:1px solid var(--line)}
+.crow .hc{flex:0 0 48px;height:66px}
+.crow .hc .ic{font-size:20px}
+.crow .hc .nm{display:none}
+.crow .inf{flex:1;min-width:0}
+.crow .inf b{font-size:14px}
+.crow .inf .sub{font-size:11px;color:var(--sub)}
+.crow .cnt{display:flex;align-items:center;gap:6px}
+.crow .cnt button{width:32px;height:32px;border-radius:50%;background:#2a3355;font-size:18px;font-weight:900}
+.crow .cnt b{min-width:20px;text-align:center;font-size:16px}
+.crow.in{background:rgba(79,195,247,.08)}
+
+/* 카드팩 */
+#pack .scroll{display:flex;flex-direction:column;align-items:center;gap:14px}
+.packbox{width:170px;height:240px;border-radius:18px;background:linear-gradient(135deg,#ffcb05,#e53935 55%,#3b4cca);display:flex;align-items:center;justify-content:center;flex-direction:column;font-size:60px;font-weight:900;box-shadow:0 8px 24px rgba(0,0,0,.5);border:4px solid #fff}
+.packbox span{font-size:16px;color:#fff;text-shadow:0 2px 3px #000}
+.pgrid{display:flex;flex-wrap:wrap;gap:8px;justify-content:center}
+.pcard{width:88px;height:124px;position:relative;cursor:pointer}
+.pcard .back{position:absolute;inset:0;border-radius:10px;background:linear-gradient(135deg,#3b4cca,#1a237e);border:3px solid #fff;display:flex;align-items:center;justify-content:center;font-size:34px}
+.pcard .hc{position:absolute;inset:0;width:88px;height:124px}
+.pcard .hc .nm{font-size:11px}
+.pcard .new{position:absolute;top:-6px;right:-6px;background:#e53935;color:#fff;font-size:10px;font-weight:900;border-radius:8px;padding:1px 5px;z-index:2}
+.pcard .r{position:absolute;bottom:18px;left:0;right:0;text-align:center;font-size:10px;color:#b8860b;font-weight:900;z-index:2}
+
+/* 미션 */
+.mis{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:10px 12px;margin-bottom:8px;display:flex;align-items:center;gap:10px}
+.mis .inf{flex:1}
+.mis .bar{height:6px;background:#2a3355;border-radius:3px;margin-top:5px;overflow:hidden}
+.mis .bar i{display:block;height:100%;background:var(--accent)}
+.mis .sub{font-size:12px;color:var(--sub)}
+.mis.done{opacity:.45}
+</style>
+</head>
+<body>
+<div id="app">
+
+<!-- 홈 -->
+<div class="screen on" id="home">
+  <h1>⚡ 포켓몬 카드 배틀<small>(가제 · 친구들끼리만 하는 팬게임)</small></h1>
+  <div class="cr" id="homeCr"></div>
+  <div class="menu">
+    <button class="btn" onclick="showOpp()">⚔️ 대전</button>
+    <button class="btn gray" onclick="openDeck()">🃏 덱 편집</button>
+    <button class="btn gray" onclick="openPack()">🎁 카드팩</button>
+    <button class="btn gray" onclick="openMissions()">📜 미션<span class="badge" id="misBadge" style="display:none"></span></button>
+  </div>
+</div>
+
+<!-- 상대 선택 -->
+<div class="screen" id="opps">
+  <div class="top"><button class="btn gray" onclick="goHome()">←</button><h2>상대 고르기</h2></div>
+  <div class="scroll" id="oppList"></div>
+</div>
+
+<!-- 배틀 -->
+<div class="screen" id="battle">
+  <div class="binfo" id="oppInfo"></div>
+  <div class="brow" id="oppBench"></div>
+  <div class="brow" id="oppActive"></div>
+  <div class="bspacer"></div>
+  <div class="mid">
+    <div id="ezone"></div>
+    <div id="log"></div>
+    <button class="btn" id="endBtn">턴 종료</button>
+  </div>
+  <div class="bspacer"></div>
+  <div class="brow" id="meActive"></div>
+  <div class="brow" id="meBench"></div>
+  <div class="binfo" id="meInfo"></div>
+  <div id="setupBar"><span>기본 포켓몬을 눌러서 배틀 자리 → 벤치 순서로 놓아 줘</span><button class="btn" id="readyBtn">준비 완료</button></div>
+  <div id="hand"></div>
+  <div id="prompt"><span id="promptTx"></span><button class="btn gray" id="promptCancel">취소</button></div>
+  <div id="banner"></div>
+  <div id="coin"><div class="c">🪙</div><div id="coinTx"></div></div>
+</div>
+
+<!-- 덱 편집 -->
+<div class="screen" id="deck">
+  <div class="top"><button class="btn gray" onclick="leaveDeck()">←</button><h2>덱 편집</h2><button class="btn" onclick="saveDeck()">저장</button></div>
+  <div class="dsum" id="dsum"></div>
+  <div class="etrow" id="etrow"></div>
+  <div class="tabs" id="dtabs"></div>
+  <div class="scroll" id="dlist" style="padding:0 6px"></div>
+</div>
+
+<!-- 카드팩 -->
+<div class="screen" id="pack">
+  <div class="top"><button class="btn gray" onclick="goHome()">←</button><h2>카드팩</h2><span class="cr" id="packCr"></span></div>
+  <div class="scroll" id="packBody"></div>
+</div>
+
+<!-- 미션 -->
+<div class="screen" id="missions">
+  <div class="top"><button class="btn gray" onclick="goHome()">←</button><h2>미션</h2><span class="cr" id="misCr"></span></div>
+  <div class="scroll" id="misList"></div>
+</div>
+
+<div id="modal"></div>
+</div>
+
+<script>
+// ================= 설정값 (여기 숫자만 바꾸면 규칙이 바뀜) =================
+const LIMIT={deck:60, energy:20, trainer:20, magic:30, trap:30, legend:3, copy:4, etypes:3};
+const WIN_POINTS=3;      // 이 점수 먼저 따면 승리 (일반 기절 1점, ex·전설 2점)
+const HAND_START=7;      // 처음 뽑는 카드 수
+const BENCH_MAX=3;       // 벤치 칸 수
+const PACK_COST=100;     // 카드팩 가격 (크리스탈)
+const PACK_SIZE=5;       // 팩 하나에 든 카드 수
+const START_CRYSTAL=200; // 처음 주는 크리스탈
+const WEAK_BONUS=20;     // 약점 추가 데미지
+
+// ================= 데이터 =================
+const T={G:{n:'풀',e:'🌿',c:'#43a047',l:'#dcf3d6'},R:{n:'불꽃',e:'🔥',c:'#ef5323',l:'#ffe0d4'},W:{n:'물',e:'💧',c:'#1e88e5',l:'#d6eaff'},
+ L:{n:'전기',e:'⚡',c:'#f2b705',l:'#fff6c9'},P:{n:'초',e:'🔮',c:'#a64fc4',l:'#f1dcf8'},F:{n:'격투',e:'👊',c:'#b0703a',l:'#f3e1cf'},
+ D:{n:'악',e:'🌙',c:'#3e4a66',l:'#d9dde8'},M:{n:'강철',e:'⚙️',c:'#7f97a6',l:'#e3eaef'},C:{n:'무색',e:'⭐',c:'#a7a7a7',l:'#f0f0f0'}};
+const ETYPES='GRWLPFDM';
+const WEAK={G:'R',R:'W',W:'L',L:'F',P:'D',F:'P',D:'G',M:'R',C:'F'};
+const KIND={poke:'포켓몬',energy:'에너지',trainer:'트레이너',magic:'마법',trap:'함정'};
+const KC={trainer:{c:'#f57c00',l:'#ffe8cc'},magic:{c:'#00897b',l:'#d0f2ee'},trap:{c:'#c2185b',l:'#fbd6e5'}};
+const STAGE=['기본','1진화','2진화'];
+const ST={poison:'☠️독',burn:'🔥화상',sleep:'💤잠듦',para:'⚡마비'};
+const ART=n=>'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/'+n+'.png';
+
+const CARDS=[], C={}, BYNAME={};
+function P(id,name,dex,type,hp,stage,from,rar,ret,atks,o={}){
+  const c={id,kind:'poke',name,dex,type,hp,stage,from,rar,ret,weak:o.weak||WEAK[type],ex:!!o.ex,legend:!!o.legend,
+    atks:atks.map(a=>({name:a[0],cost:a[1],dmg:a[2],eff:a[3]||null}))};
+  CARDS.push(c); C[id]=c; if(!BYNAME[name]) BYNAME[name]=c;
+}
+function X(id,kind,name,icon,rar,txt,o={}){const c={id,kind,name,icon,rar,txt,...o};CARDS.push(c);C[id]=c;}
+
+// --- 풀 ---
+P('bulbasaur','이상해씨',1,'G',70,0,null,1,1,[['덩굴채찍','G',20]]);
+P('ivysaur','이상해풀',2,'G',90,1,'이상해씨',2,2,[['잎날가르기','GC',40]]);
+P('venusaur','이상해꽃',3,'G',160,2,'이상해풀',3,3,[['메가드레인','GGCC',80,{heal:30}]]);
+P('caterpie','캐터피',10,'G',50,0,null,1,1,[['벌레먹음','G',20]]);
+P('metapod','단데기',11,'G',80,1,'캐터피',1,2,[['단단해지기','C',0,{shield:40}]]);
+P('butterfree','버터플',12,'G',120,2,'단데기',2,1,[['수면가루','G',20,{sleep:1}],['은빛바람','GGC',70]]);
+P('oddish','뚜벅쵸',43,'G',60,0,null,1,1,[['독가루','G',10,{poison:1}]]);
+P('gloom','냄새꼬',44,'G',90,1,'뚜벅쵸',2,1,[['독가루폭탄','GC',30,{poison:1}]]);
+P('celebi','셀레비',251,'G',110,0,null,4,1,[['시간의꽃','GG',50,{healTeam:20}]],{legend:1});
+// --- 불꽃 ---
+P('charmander','파이리',4,'R',60,0,null,1,1,[['불꽃세례','R',20]]);
+P('charmeleon','리자드',5,'R',90,1,'파이리',2,1,[['불꽃엄니','RC',50]]);
+P('charizard','리자몽',6,'R',150,2,'리자드',3,2,[['블래스트번','RRCC',140,{discard:2}]]);
+P('charizardex','리자몽ex',6,'R',180,2,'리자드',4,2,[['날개치기','RC',60],['크림슨스톰','RRRC',200,{discard:2}]],{ex:1});
+P('vulpix','식스테일',37,'R',60,0,null,1,1,[['도깨비불','R',10,{burn:1}]]);
+P('ninetales','나인테일',38,'R',100,1,'식스테일',2,1,[['괴이한불꽃','RR',60,{burn:1}]]);
+P('growlithe','가디',58,'R',70,0,null,1,1,[['물기','RC',30]]);
+P('arcanine','윈디',59,'R',130,1,'가디',3,2,[['신속','C',30],['플레어드라이브','RRRC',150,{recoil:30}]]);
+P('moltres','파이어',146,'R',130,0,null,4,2,[['열풍','RRC',70,{benchAll:10}]],{legend:1});
+// --- 물 ---
+P('squirtle','꼬부기',7,'W',60,0,null,1,1,[['물대포','W',20]]);
+P('wartortle','어니부기',8,'W',90,1,'꼬부기',2,1,[['물의파동','WC',40]]);
+P('blastoise','거북왕',9,'W',160,2,'어니부기',3,3,[['하이드로펌프','WWCC',120]]);
+P('magikarp','잉어킹',129,'W',30,0,null,1,1,[['튀어오르기','C',10]]);
+P('gyarados','갸라도스',130,'W',160,1,'잉어킹',3,3,[['파괴광선','WWWC',140]]);
+P('psyduck','고라파덕',54,'W',70,0,null,1,1,[['물튀기기','WC',30]]);
+P('golduck','골덕',55,'W',100,1,'고라파덕',2,1,[['사이코샷','WWC',70,{para:'coin'}]]);
+P('articuno','프리져',144,'W',130,0,null,4,2,[['냉동빔','WWC',60,{para:'coin'}],['눈보라','WWWC',100,{benchAll:10}]],{legend:1});
+// --- 전기 ---
+P('pikachu','피카츄',25,'L',60,0,null,1,1,[['전기쇼크','L',20,{para:'coin'}]]);
+P('raichu','라이츄',26,'L',100,1,'피카츄',2,1,[['10만볼트','LLC',100,{discard:1}]]);
+P('pikachuex','피카츄ex',25,'L',120,0,null,4,1,[['서클서킷','LL',30,{perBench:30}]],{ex:1});
+P('voltorb','찌리리공',100,'L',60,0,null,1,1,[['구르기','L',20]]);
+P('electrode','붐볼',101,'L',90,1,'찌리리공',2,1,[['대폭발','LL',130,{recoil:999}]]);
+P('magnemite','코일',81,'L',60,0,null,1,1,[['자기장','L',20]]);
+P('magneton','레어코일',82,'L',90,1,'코일',2,2,[['자석폭탄','LLC',70]]);
+P('zapdos','썬더',145,'L',130,0,null,4,1,[['뇌격','LLC',80,{coinPlus:40}]],{legend:1});
+// --- 초 ---
+P('gastly','고오스',92,'P',50,0,null,1,1,[['핥기','P',10,{para:'coin'}]]);
+P('haunter','고우스트',93,'P',80,1,'고오스',2,1,[['최면술','P',20,{sleep:1}]]);
+P('gengar','팬텀',94,'P',140,2,'고우스트',3,1,[['악몽','PP',60,{sleep:1}],['섀도볼','PPC',110]]);
+P('abra','캐이시',63,'P',40,0,null,1,0,[['염동력','P',10]]);
+P('kadabra','윤겔라',64,'P',80,1,'캐이시',2,1,[['사이코키네시스','PC',50]]);
+P('alakazam','후딘',65,'P',140,2,'윤겔라',3,1,[['사이코','PPC',110]]);
+P('mew','뮤',151,'P',90,0,null,4,0,[['신비의힘','PC',50,{draw:2}]],{legend:1});
+P('mewtwoex','뮤츠ex',150,'P',150,0,null,4,2,[['염동탄','PC',50],['사이코드라이브','PPPC',160,{discard:2}]],{ex:1,legend:1});
+// --- 격투 ---
+P('machop','알통몬',66,'F',70,0,null,1,1,[['당수','F',20]]);
+P('machoke','근육몬',67,'F',100,1,'알통몬',2,2,[['태권당수','FC',50]]);
+P('machamp','괴력몬',68,'F',160,2,'근육몬',3,3,[['폭발펀치','FFCC',130]]);
+P('riolu','리오르',447,'F',70,0,null,1,1,[['힘껏치기','FC',30]]);
+P('lucario','루카리오',448,'F',120,1,'리오르',3,2,[['파동탄','FFC',80,{coinPlus:30}]]);
+P('geodude','꼬마돌',74,'F',80,0,null,1,2,[['돌던지기','F',20]]);
+P('graveler','데구리',75,'F',100,1,'꼬마돌',2,2,[['바위떨구기','FC',50]]);
+P('golem','딱구리',76,'F',170,2,'데구리',3,4,[['헤비봄버','FFFC',150]]);
+// --- 악 ---
+P('murkrow','니로우',198,'D',60,0,null,1,1,[['쪼기','D',20]]);
+P('honchkrow','돈크로우',430,'D',110,1,'니로우',3,1,[['나이트스래시','DC',60,{coinPlus:30}]]);
+P('houndour','델빌',228,'D',60,0,null,1,1,[['물기','D',20]]);
+P('houndoom','헬가',229,'D',110,1,'델빌',2,1,[['악의불꽃','DDC',70,{burn:1}]]);
+P('darkrai','다크라이',491,'D',130,0,null,4,1,[['다크홀','DDC',70,{sleep:1}]],{legend:1});
+// --- 강철 ---
+P('beldum','메탕',374,'M',60,0,null,1,1,[['돌진','M',20]]);
+P('metang','메탕구',375,'M',90,1,'메탕',2,2,[['메탈클로','MC',50]]);
+P('metagross','메타그로스',376,'M',170,2,'메탕구',3,3,[['코멧펀치','MMCC',140]]);
+P('skarmory','무장조',227,'M',90,0,null,2,1,[['강철날개','MC',40,{shield:20}]]);
+// --- 무색 ---
+P('rattata','꼬렛',19,'C',40,0,null,1,0,[['필살앞니','C',20]]);
+P('raticate','레트라',20,'C',80,1,'꼬렛',1,1,[['분노의앞니','CC',50]]);
+P('eevee','이브이',133,'C',60,0,null,1,1,[['몸통박치기','C',20]]);
+P('snorlax','잠만보',143,'C',150,0,null,3,4,[['헤비봄버','CCCC',100]]);
+P('dratini','미뇽',147,'C',60,0,null,1,1,[['용의숨결','C',20]]);
+P('dragonair','신뇽',148,'C',90,1,'미뇽',2,2,[['용의파동','CC',50]]);
+P('dragonite','망나뇽',149,'C',170,2,'신뇽',3,2,[['역린','WLCC',170]]);
+P('lugia','루기아',249,'C',140,0,null,4,2,[['에어로블라스트','CCCC',130]],{legend:1});
+
+// --- 트레이너 (사람 카드, 턴에 1장) ---
+X('ash','trainer','지우','🧢',2,'카드를 3장 뽑는다.');
+X('oak','trainer','오박사','👴',2,'패를 모두 덱에 섞고 6장 뽑는다.');
+X('brock','trainer','웅','🪨',1,'내 포켓몬 1마리의 HP를 50 회복한다.');
+X('misty','trainer','이슬','🌊',2,'내 물 포켓몬 1마리에게 💧에너지를 2개 붙인다.');
+X('rocket','trainer','로켓단','🚀',3,'상대 배틀 포켓몬을 상대 벤치 포켓몬과 강제로 바꾼다. (내가 고름)');
+X('gary','trainer','그린','😎',3,'이번 턴, 내 포켓몬 기술 데미지 +30.');
+// --- 마법 (도구 카드, 여러 장 가능) ---
+X('switch','magic','교체','🔄',1,'내 배틀 포켓몬을 벤치 포켓몬과 바꾼다.');
+X('pokeball','magic','몬스터볼','⚪',1,'덱에서 기본 포켓몬 1장을 무작위로 패에 넣는다.');
+X('potion','magic','상처약','🧴',1,'내 포켓몬 1마리의 HP를 30 회복한다.');
+X('candy','magic','이상한사탕','🍬',3,'내 기본 포켓몬을 패에 있는 2진화 포켓몬으로 바로 진화시킨다.');
+X('fullheal','magic','만병통치약','💊',2,'내 배틀 포켓몬의 상태이상을 고치고 HP를 20 회복한다.');
+X('xattack','magic','X공격','💥',2,'이번 턴, 내 포켓몬 기술 데미지 +20.');
+X('eretrieve','magic','에너지회수','♻️',2,'버린 에너지 카드를 2장까지 패로 가져온다.');
+// --- 함정 (상대 턴에 패에서 발동) ---
+X('wall','trap','방어벽','🛡️',1,'상대가 공격할 때: 받는 데미지 -50.',{trig:'attack'});
+X('mirror','trap','반사거울','🪞',2,'상대가 공격할 때: 공격한 포켓몬에게 40 데미지.',{trig:'attack'});
+X('paratrap','trap','저리가루덫','🌫️',2,'상대가 공격할 때: 공격한 포켓몬을 마비시킨다.',{trig:'attack'});
+X('dodge','trap','긴급회피','💨',2,'상대가 공격할 때: 동전 앞면이면 공격을 무효로 한다.',{trig:'attack'});
+X('counter','trap','카운터','✋',3,'상대가 트레이너나 마법 카드를 쓸 때: 그 카드를 무효로 한다.',{trig:'card'});
+// --- 에너지 카드 (무제한 보유) ---
+for(const t of ETYPES) X('e'+t,'energy',T[t].n+' 에너지',T[t].e,0,'포켓몬에게 붙이는 '+T[t].n+' 에너지. 턴에 1장.',{etype:t});
+
+const STARTER={charmander:4,charmeleon:3,charizard:2,squirtle:4,wartortle:3,blastoise:2,rattata:3,raticate:2,eevee:1,
+  eR:6,eW:6, ash:4,brock:2,oak:2, switch:3,pokeball:4,potion:3,xattack:2, wall:2,mirror:2};
+const STARTER_E=['R','W'];
+
+const OPPS=[
+ {id:'kid',name:'반바지 꼬마',icon:'👦',lv:'쉬움',reward:30,etypes:['G'],
+  cards:{rattata:4,raticate:3,caterpie:4,metapod:3,butterfree:2,eevee:4,oddish:4,gloom:3,dratini:3,dragonair:2,ash:3,brock:3,pokeball:4,potion:4,switch:2,wall:2}},
+ {id:'sabrina',name:'나츠메',icon:'🔮',lv:'보통',reward:40,etypes:['P'],
+  cards:{gastly:4,haunter:3,gengar:2,abra:4,kadabra:3,alakazam:2,mew:1,mewtwoex:1,ash:4,oak:2,rocket:2,pokeball:4,candy:2,switch:3,potion:3,fullheal:1,dodge:2,paratrap:2,counter:1}},
+ {id:'blaine',name:'카츠라',icon:'🔥',lv:'어려움',reward:60,etypes:['R'],
+  cards:{charmander:4,charmeleon:3,charizard:2,vulpix:4,ninetales:3,growlithe:4,arcanine:2,moltres:1,ash:4,oak:2,gary:2,pokeball:4,switch:2,potion:3,xattack:2,candy:1,mirror:2,wall:2}},
+ {id:'surge',name:'마티스',icon:'⚡',lv:'어려움',reward:60,etypes:['L'],
+  cards:{pikachu:4,raichu:3,pikachuex:1,voltorb:4,electrode:2,magnemite:4,magneton:3,zapdos:1,ash:4,rocket:2,gary:2,pokeball:4,switch:3,potion:3,xattack:2,paratrap:2,counter:2}},
+ {id:'red',name:'챔피언 레드',icon:'🧢',lv:'최강',reward:120,etypes:['W','F'],
+  cards:{squirtle:4,wartortle:3,blastoise:2,machop:4,machoke:3,machamp:2,riolu:3,lucario:2,snorlax:2,articuno:1,lugia:1,ash:4,oak:2,brock:2,gary:2,pokeball:4,candy:2,switch:2,potion:3,wall:2,mirror:2}},
+];
+function oppDeck(o){ // 모자란 칸은 에너지 카드로 채움
+  const d={...o.cards}; let n=Object.values(d).reduce((a,b)=>a+b,0), i=0;
+  while(n<LIMIT.deck){ const id='e'+o.etypes[i++%o.etypes.length]; d[id]=(d[id]||0)+1; n++; }
+  return d;
+}
+
+const MISSIONS=[
+ {id:'win1',name:'첫 승리',goal:1,v:s=>s.st.wins,r:50},
+ {id:'win5',name:'5번 이기기',goal:5,v:s=>s.st.wins,r:150},
+ {id:'win20',name:'20번 이기기',goal:20,v:s=>s.st.wins,r:400},
+ {id:'ko10',name:'포켓몬 10마리 쓰러뜨리기',goal:10,v:s=>s.st.kos,r:100},
+ {id:'ko50',name:'포켓몬 50마리 쓰러뜨리기',goal:50,v:s=>s.st.kos,r:300},
+ {id:'evo10',name:'진화 10번 하기',goal:10,v:s=>s.st.evo,r:100},
+ {id:'trap5',name:'함정 카드 5번 발동',goal:5,v:s=>s.st.traps,r:100},
+ {id:'big1',name:'ex·전설 포켓몬으로 쓰러뜨리기',goal:1,v:s=>s.st.big,r:100},
+ {id:'pack3',name:'카드팩 3개 까기',goal:3,v:s=>s.st.packs,r:100},
+ {id:'deck',name:'덱을 직접 저장하기',goal:1,v:s=>s.st.saved,r:50},
+ {id:'beat3',name:'서로 다른 상대 3명 이기기',goal:3,v:s=>Object.keys(s.st.beat).length,r:200},
+ {id:'beatall',name:'모든 상대 이기기',goal:OPPS.length,v:s=>Object.keys(s.st.beat).length,r:500},
+];
+
+// ================= 저장 =================
+const SKEY='pocket_save_v1';
+let S;
+function defSave(){
+  const col={}; for(const [id,n] of Object.entries(STARTER)) if(C[id].kind!=='energy') col[id]=n;
+  return {cr:START_CRYSTAL,col,deck:{...STARTER},etypes:[...STARTER_E],st:{wins:0,kos:0,evo:0,traps:0,big:0,packs:0,saved:0,beat:{}},claimed:{}};
+}
+function load(){ try{S=JSON.parse(localStorage.getItem(SKEY));}catch(e){S=null} if(!S||!S.col) S=defSave(); }
+function save(){ try{localStorage.setItem(SKEY,JSON.stringify(S));}catch(e){} }
+load();
+
+// ================= 공통 도구 =================
+const $=q=>document.querySelector(q);
+let SPEED=1;
+const wait=ms=>SPEED===0?Promise.resolve():new Promise(r=>setTimeout(r,ms*SPEED));
+function shuffle(a){for(let i=a.length-1;i>0;i--){const j=Math.random()*(i+1)|0;[a[i],a[j]]=[a[j],a[i]];}return a;}
+function jo(w,a,b){ w=String(w); const ch=w.charCodeAt(w.length-1); if(ch<0xAC00||ch>0xD7A3) return w+b; const f=(ch-0xAC00)%28; if(a==='으로') return w+(f===0||f===8?'로':'으로'); return w+(f?a:b); }
+const isBasic=c=>c.kind==='poke'&&c.stage===0;
+const rarTxt=r=>r>=4?'★':r>0?'◆'.repeat(r):'';
+const eIco=(t,lg)=>`<span class="eico${lg?' lg':''}" style="--ec:${T[t].c}">${T[t].e}</span>`;
+const costHTML=cost=>[...cost].map(t=>eIco(t)).join('');
+function colorOf(c){ if(c.kind==='poke') return T[c.type]; if(c.kind==='energy') return T[c.etype]; return KC[c.kind]; }
+function show(id){ document.querySelectorAll('.screen').forEach(s=>s.classList.toggle('on',s.id===id)); }
+
+function effText(e){ if(!e) return ''; const o=[];
+  if(e.perBench) o.push(`내 벤치의 같은 타입 포켓몬 수 × ${e.perBench} 추가`);
+  if(e.coinPlus) o.push(`동전 앞면이면 ${e.coinPlus} 추가`);
+  if(e.heal) o.push(`자신의 HP를 ${e.heal} 회복`);
+  if(e.healTeam) o.push(`내 포켓몬 전원 HP ${e.healTeam} 회복`);
+  if(e.poison) o.push('상대를 독 상태로');
+  if(e.burn) o.push('상대를 화상으로');
+  if(e.sleep) o.push('상대를 잠듦으로');
+  if(e.para==='coin') o.push('동전 앞면이면 상대를 마비'); else if(e.para) o.push('상대를 마비');
+  if(e.benchAll) o.push(`상대 벤치 전원에게 ${e.benchAll} 데미지`);
+  if(e.recoil) o.push(e.recoil>=999?'자신도 기절한다':`자신도 ${e.recoil} 데미지`);
+  if(e.discard) o.push(`자신의 에너지 ${e.discard}개를 버린다`);
+  if(e.draw) o.push(`카드 ${e.draw}장 뽑기`);
+  if(e.shield) o.push(`다음 상대 턴에 받는 데미지 -${e.shield}`);
+  return o.join(' · ');
+}
+function bigCardHTML(c,m){
+  const col=colorOf(c);
+  if(c.kind==='poke'){
+    const tag=c.legend?' ★전설':'', ex=c.ex?' ex':'';
+    return `<div class="bigcard" style="--tc:${col.c};--tcl:${col.l}">
+      <div class="hd"><div><small>${STAGE[c.stage]}${c.from?' · '+c.from+'에서 진화':''}${tag}</small>${c.name}</div><div>HP ${c.hp} ${eIco(c.type,1)}</div></div>
+      <div class="art"><img src="${ART(c.dex)}" onerror="this.replaceWith('${T[c.type].e}')"></div>
+      ${c.atks.map(a=>`<div class="atk"><div class="row">${costHTML(a.cost)} <span>${a.name}</span><span class="dm">${a.dmg||''}</span></div>${a.eff?`<div class="tx">${effText(a.eff)}</div>`:''}</div>`).join('')}
+      ${m?`<div class="now">남은 HP <b>${c.hp-m.dmg}</b> · 붙은 에너지 ${m.energy.map(e=>eIco(e.t)).join('')||'없음'}${m.status?' · '+ST[m.status]:''}</div>`:''}
+      <div class="ft"><span>약점 ${eIco(c.weak)} +${WEAK_BONUS}</span><span>후퇴 ${c.ret?costHTML('C'.repeat(c.ret)):'없음'}</span><span class="rar">${rarTxt(c.rar)}</span></div>
+      ${(c.ex||c.legend)?'<div class="ft"><span>기절하면 상대가 2점을 얻는다</span></div>':''}
+    </div>`;
+  }
+  const kind=c.kind==='energy'?'에너지':KIND[c.kind];
+  return `<div class="bigcard" style="--tc:${col.c};--tcl:${col.l}">
+    <div class="hd"><div><small>${kind}</small>${c.name}</div><div class="rar">${rarTxt(c.rar)}</div></div>
+    <div class="art">${c.icon}</div>
+    <div class="txt">${c.txt}${c.kind==='trap'?'<br><small style="color:#888">상대 턴에 조건이 되면 패에서 발동할지 물어봐요. 상대 턴마다 1장.</small>':''}${c.kind==='trainer'?'<br><small style="color:#888">트레이너는 턴에 1장만.</small>':''}</div>
+  </div>`;
+}
+function handCardHTML(c,dim){
+  const col=colorOf(c);
+  const pic=c.kind==='poke'?`<img src="${ART(c.dex)}" loading="lazy" onerror="this.style.visibility='hidden'">`:`<div class="ic">${c.icon}</div>`;
+  const kd=c.kind==='poke'?(c.stage?STAGE[c.stage]:'기본')+(c.legend?'★':c.ex?' ex':''):KIND[c.kind];
+  return `<div class="hc${dim?' dim':''}" data-uid="${c.uid||''}" data-id="${c.id}" style="--tc:${col.c};--tcl:${col.l}"><span class="kd">${kd}</span>${pic}<div class="nm">${c.name}</div></div>`;
+}
+
+// 모달: 버튼 누르면 그 값으로 끝남
+function modal(html,btns,opt={}){
+  return new Promise(res=>{
+    const m=$('#modal');
+    m.innerHTML=`<div class="mbox">${html}<div class="mbtns">${btns.map((b,i)=>`<button class="btn ${b.cls||''}" data-i="${i}" ${b.dis?'disabled':''}>${b.label}</button>`).join('')}</div></div>`;
+    m.classList.add('on');
+    m.onclick=e=>{
+      const b=e.target.closest('button[data-i]');
+      if(b&&!b.disabled){ m.classList.remove('on'); m.onclick=null; res(btns[+b.dataset.i].v); }
+      else if(opt.dismiss&&(e.target===m||e.target.classList.contains('mbox'))){ m.classList.remove('on'); m.onclick=null; res(null); }
+    };
+  });
+}
+const alertBox=(msg)=>modal(`<div class="mtext">${msg}</div>`,[{v:1,label:'확인'}]);
+
+// ================= 홈 =================
+function goHome(){
+  show('home'); $('#homeCr').textContent='💎 '+S.cr;
+  const n=MISSIONS.filter(m=>!S.claimed[m.id]&&m.v(S)>=m.goal).length;
+  const b=$('#misBadge'); b.style.display=n?'':'none'; b.textContent=n;
+}
+function showOpp(){
+  show('opps');
+  $('#oppList').innerHTML=OPPS.map((o,i)=>`<button class="opp" onclick="pickOpp(${i})"><span class="ic">${o.icon}</span>
+    <div><b>${o.name}</b>${S.st.beat[o.id]?' ✅':''}<div class="sub">${o.lv} · ${o.etypes.map(t=>T[t].e).join('')}</div></div>
+    <div class="rw">승리 보상<br><span class="cr">💎 ${o.reward}</span></div></button>`).join('');
+}
+async function pickOpp(i){
+  const v=validate(S.deck,S.etypes);
+  if(!v.ok){ await alertBox('덱이 아직 규칙에 안 맞아!<br><small>'+v.errs.join('<br>')+'</small>'); return openDeck(); }
+  startBattle(OPPS[i]);
+}
+
+// ================= 배틀 엔진 =================
+const ME=0, AI=1;
+let G=null, UID=0, chooser=null;
+function expand(map){const out=[];for(const [id,n] of Object.entries(map)) for(let i=0;i<n;i++) out.push({...C[id],uid:++UID});return out;}
+function side(deck,etypes,isAI,name){return {name,deck:shuffle(deck),hand:[],discard:[],active:null,bench:[],points:0,etypes:[...etypes],curE:null,eUsed:false,eCardUsed:false,trUsed:false,retreated:false,trapUsed:false,bonus:0,isAI};}
+function newMon(card){return {c:card,dmg:0,energy:[],status:null,played:G.turnNo,evolved:-1,under:[],shield:0,paraTurn:0,uid:++UID,hitAt:0,hitD:0};}
+const mons=s=>s.active?[s.active,...s.bench]:[...s.bench];
+function findMon(uid){for(const s of G.p) for(const m of mons(s)) if(m.uid===uid) return m;return null;}
+function ownerOf(m){return G.p.findIndex(s=>mons(s).includes(m));}
+function log(t){ if(!G) return; G.log.push(t); if(G.log.length>40) G.log.shift(); }
+function stat(si,k){ if(G.test||si!==ME) return; S.st[k]++; }
+
+function startBattle(opp,opt={}){
+  chooser=null;
+  G={opp,turnNo:0,cur:ME,over:false,busy:true,phase:'setup',log:[],test:!!opt.test,
+     p:[side(expand(opt.meDeck||S.deck),opt.meE||S.etypes,!!opt.test,'나'), side(expand(oppDeck(opp)),opp.etypes,true,opp.name)]};
+  if(!opt.test) show('battle');
+  return setupBattle();
+}
+function dealOpening(s){
+  for(let t=0;t<60;t++){ s.deck.push(...s.hand); s.hand=[]; shuffle(s.deck); s.hand=s.deck.splice(-HAND_START); if(s.hand.some(isBasic)) break; }
+}
+function aiSetup(s){
+  const b=s.hand.filter(isBasic).sort((a,b)=>b.hp-a.hp);
+  for(const c of b){ if(!s.active) placeBasic(s,c); else if(s.bench.length<BENCH_MAX) placeBasic(s,c); }
+}
+function placeBasic(s,c){ s.hand.splice(s.hand.indexOf(c),1); const m=newMon(c); if(!s.active) s.active=m; else s.bench.push(m); return m; }
+let setupDone=null;
+async function setupBattle(){
+  for(const s of G.p) dealOpening(s);
+  for(const s of G.p) if(s.isAI) aiSetup(s);
+  log('배틀 시작!');
+  if(!G.p[ME].isAI){ G.phase='setup'; G.busy=false; render(); await new Promise(r=>setupDone=r); }
+  G.phase='play'; G.busy=true; render();
+  const head=await coin('누가 먼저 할까?');
+  G.cur=head?ME:AI;
+  log(G.cur===ME?'동전 앞면! 내가 먼저':'동전 뒷면! 상대가 먼저');
+  await banner(G.cur===ME?'내가 먼저!':'상대가 먼저!');
+  return startTurn();
+}
+
+async function startTurn(){
+  if(G.over) return;
+  G.turnNo++;
+  const s=G.p[G.cur], o=G.p[1-G.cur];
+  Object.assign(s,{eUsed:false,eCardUsed:false,trUsed:false,retreated:false,bonus:0,trapUsed:false}); o.trapUsed=false;
+  mons(s).forEach(m=>m.shield=0);
+  if(!s.deck.length) return endGame(1-G.cur,`${s.name}의 덱이 다 떨어졌다!`);
+  s.hand.push(s.deck.pop());
+  s.curE=G.turnNo===1?null:s.etypes[Math.random()*s.etypes.length|0];
+  if(G.turnNo>400) return endGame(G.p[ME].points>=G.p[AI].points?ME:AI,'시간 초과!');
+  render();
+  await banner(G.cur===ME&&!s.isAI?'내 차례!':`${s.name}의 차례`,650);
+  if(s.isAI){ G.busy=true; render(); await aiTurn(G.cur); if(!G.over) await endTurn(); }
+  else { G.busy=false; render(); }
+}
+async function endTurn(){
+  if(G.over) return;
+  G.busy=true;
+  const s=G.p[G.cur]; s.curE=null;
+  for(const si of [G.cur,1-G.cur]){ // 턴 끝 상태이상 체크
+    const m=G.p[si].active; if(!m||!m.status) continue;
+    if(m.status==='poison'){ m.dmg+=10; log(`${m.c.name} 독 데미지 10`); }
+    else if(m.status==='burn'){ m.dmg+=20; log(`${m.c.name} 화상 데미지 20`); if(await coin(`${m.c.name} 화상 회복?`)){ m.status=null; log('화상이 나았다!'); } }
+    else if(m.status==='sleep'){ if(await coin(`${m.c.name} 깨어날까?`)){ m.status=null; log(`${jo(m.c.name,'이','가')} 깨어났다!`); } else log(`${jo(m.c.name,'은','는')} 계속 자고 있다`); }
+    else if(m.status==='para'&&si===G.cur&&G.turnNo>m.paraTurn){ m.status=null; log(`${m.c.name}의 마비가 풀렸다`); }
+  }
+  render();
+  await checkKOs(); if(G.over) return;
+  G.cur=1-G.cur;
+  return startTurn();
+}
+
+// --- 규칙 판정 ---
+function lack(energy,cost){ // 기술을 쓰려면 에너지가 몇 개 더 필요한지
+  const pool=energy.map(e=>e.t||e); let miss=0, cc=0;
+  for(const ch of cost){ if(ch==='C'){cc++;continue;} const i=pool.indexOf(ch); if(i<0) miss++; else pool.splice(i,1); }
+  return miss+Math.max(0,cc-pool.length);
+}
+const canPay=(energy,cost)=>lack(energy,cost)===0;
+function canAttack(si,i){
+  const s=G.p[si], m=s.active; if(!m||G.phase!=='play'||G.cur!==si||G.turnNo===1) return false;
+  if(m.status==='sleep'||m.status==='para') return false;
+  return canPay(m.energy,m.c.atks[i].cost);
+}
+function canRetreat(si){
+  const s=G.p[si], a=s.active;
+  return a&&G.cur===si&&!s.retreated&&s.bench.length>0&&a.energy.length>=a.c.ret&&a.status!=='sleep'&&a.status!=='para';
+}
+const canEvoTarget=m=>G.turnNo>2&&m.played!==G.turnNo&&m.evolved!==G.turnNo;
+const evoTargets=(s,c)=>mons(s).filter(m=>m.c.name===c.from&&canEvoTarget(m));
+const isStage2For=(c,m)=>c.kind==='poke'&&c.stage===2&&BYNAME[c.from]&&BYNAME[c.from].from===m.c.name;
+const candyTargets=s=>mons(s).filter(m=>m.c.stage===0&&canEvoTarget(m)&&s.hand.some(c=>isStage2For(c,m)));
+function canUse(si,c){
+  const s=G.p[si], o=G.p[1-si];
+  if(G.phase!=='play'||G.cur!==si) return false;
+  if(c.kind==='trainer'&&s.trUsed) return false;
+  switch(c.id){
+    case 'ash': case 'oak': return s.deck.length>0;
+    case 'brock': case 'potion': return mons(s).some(m=>m.dmg>0);
+    case 'misty': return mons(s).some(m=>m.c.type==='W');
+    case 'rocket': return !!o.active&&o.bench.length>0;
+    case 'gary': case 'xattack': return true;
+    case 'switch': return !!s.active&&s.bench.length>0;
+    case 'pokeball': return s.deck.some(isBasic);
+    case 'candy': return candyTargets(s).length>0;
+    case 'fullheal': return !!s.active&&(!!s.active.status||s.active.dmg>0);
+    case 'eretrieve': return s.discard.some(x=>x.kind==='energy');
+  }
+  return false;
+}
+function calcDmg(s,m,atk,def,head){
+  if(!def) return 0; const e=atk.eff||{}; let d=atk.dmg;
+  if(d<=0&&!e.perBench) return 0;
+  if(e.perBench) d+=s.bench.filter(x=>x.c.type===m.c.type).length*e.perBench;
+  if(e.coinPlus&&head) d+=e.coinPlus;
+  d+=s.bonus;
+  if(def.c.weak===m.c.type) d+=WEAK_BONUS;
+  d-=def.shield||0;
+  return Math.max(0,d);
+}
+function heal(m,n){ m.dmg=Math.max(0,m.dmg-n); }
+function draw(s,n){ for(let i=0;i<n&&s.deck.length;i++) s.hand.push(s.deck.pop()); }
+function setSt(m,st){ m.status=st; if(st==='para') m.paraTurn=G.turnNo; }
+
+// --- 행동 (나와 컴퓨터 공용) ---
+function playBasic(si,c){ const s=G.p[si]; if(s.bench.length>=BENCH_MAX&&s.active) return; const m=placeBasic(s,c); log(`${s.name}: ${jo(c.name,'을','를')} 냈다`); return m; }
+function evolve(si,c,m){
+  const s=G.p[si]; s.hand.splice(s.hand.indexOf(c),1);
+  log(`${s.name}: ${m.c.name} → ${c.name} 진화!`);
+  m.under.push(m.c); m.c=c; m.status=null; m.evolved=G.turnNo; stat(si,'evo');
+}
+function attachAuto(si,m){ const s=G.p[si]; m.energy.push({t:s.curE}); log(`${s.name}: ${T[s.curE].e}에너지 → ${m.c.name}`); s.curE=null; s.eUsed=true; }
+function attachCard(si,m,c){ const s=G.p[si]; s.hand.splice(s.hand.indexOf(c),1); m.energy.push({t:c.etype,card:c}); s.eCardUsed=true; log(`${s.name}: ${c.name} 카드 → ${m.c.name}`); }
+
+async function pickMon(si,list,msg,score,cancel=true){
+  if(!list.length) return null;
+  if(G.p[si].isAI) return list.slice().sort((a,b)=>score(b)-score(a))[0];
+  return chooseMon(list,msg,cancel);
+}
+async function pickCard(si,cards,msg){
+  if(cards.length===1||G.p[si].isAI) return cards[0];
+  return modal(`<div class="mtext">${msg}</div><div style="display:flex;gap:6px;flex-wrap:wrap;justify-content:center">${cards.map(c=>handCardHTML(c)).join('')}</div>`,
+    [...cards.map(c=>({v:c,label:c.name})),{v:null,label:'취소',cls:'gray'}]);
+}
+
+async function useCard(si,c){
+  const s=G.p[si], o=G.p[1-si];
+  if(!canUse(si,c)) return false;
+  let tgt=null, tgt2=null;
+  switch(c.id){
+    case 'brock': case 'potion': tgt=await pickMon(si,mons(s).filter(m=>m.dmg>0),'회복할 포켓몬을 골라',m=>m.dmg); if(!tgt) return false; break;
+    case 'misty': tgt=await pickMon(si,mons(s).filter(m=>m.c.type==='W'),'💧에너지를 붙일 포켓몬을 골라',m=>energyScore(s,m,'W')); if(!tgt) return false; break;
+    case 'rocket': tgt=await pickMon(si,o.bench,'상대 배틀 자리로 끌어낼 포켓몬을 골라',m=>-(m.c.hp-m.dmg)); if(!tgt) return false; break;
+    case 'switch': tgt=await pickMon(si,s.bench,'배틀 자리로 나갈 포켓몬을 골라',m=>readyScore(m)); if(!tgt) return false; break;
+    case 'candy': {
+      tgt=await pickMon(si,candyTargets(s),'진화시킬 기본 포켓몬을 골라',m=>(m===s.active?10:0)+m.dmg); if(!tgt) return false;
+      tgt2=await pickCard(si,s.hand.filter(x=>isStage2For(x,tgt)),'어떤 포켓몬으로 진화할까?'); if(!tgt2) return false; break; }
+  }
+  s.hand.splice(s.hand.indexOf(c),1); s.discard.push(c);
+  if(c.kind==='trainer') s.trUsed=true;
+  log(`${s.name}: ${c.icon} ${c.name} 사용!`); render(); await wait(350);
+  const mod={}; await trapPhase(1-si,'card',mod,{card:c});
+  if(mod.cancel){ log(`${jo(c.name,'이','가')} 무효가 됐다!`); render(); return true; }
+  switch(c.id){
+    case 'ash': draw(s,3); break;
+    case 'oak': s.deck.push(...s.hand); s.hand=[]; shuffle(s.deck); draw(s,6); break;
+    case 'brock': heal(tgt,50); break;
+    case 'potion': heal(tgt,30); break;
+    case 'misty': tgt.energy.push({t:'W'},{t:'W'}); break;
+    case 'rocket': { const i=o.bench.indexOf(tgt); o.active.status=null; o.bench[i]=o.active; o.active=tgt; log(`${jo(tgt.c.name,'이','가')} 끌려 나왔다!`); break; }
+    case 'gary': s.bonus+=30; break;
+    case 'xattack': s.bonus+=20; break;
+    case 'switch': { const i=s.bench.indexOf(tgt); s.active.status=null; s.bench[i]=s.active; s.active=tgt; break; }
+    case 'pokeball': { const b=s.deck.filter(isBasic); const pk=b[Math.random()*b.length|0]; s.deck.splice(s.deck.indexOf(pk),1); s.hand.push(pk); shuffle(s.deck); log(`${jo(pk.name,'을','를')} 찾았다!`); break; }
+    case 'candy': evolve(si,tgt2,tgt); break;
+    case 'fullheal': s.active.status=null; heal(s.active,20); break;
+    case 'eretrieve': { for(let k=0;k<2;k++){ const e=s.discard.find(x=>x.kind==='energy'); if(!e) break; s.discard.splice(s.discard.indexOf(e),1); s.hand.push(e);} break; }
+  }
+  render(); return true;
+}
+
+async function retreat(si){
+  const s=G.p[si]; if(!canRetreat(si)) return false;
+  const tgt=await pickMon(si,s.bench,'교대할 벤치 포켓몬을 골라',m=>readyScore(m)); if(!tgt) return false;
+  const a=s.active;
+  for(let i=0;i<a.c.ret;i++){ const e=a.energy.pop(); if(e&&e.card) s.discard.push(e.card); }
+  a.status=null; s.bench[s.bench.indexOf(tgt)]=a; s.active=tgt; s.retreated=true;
+  log(`${s.name}: ${a.c.name} 후퇴 → ${tgt.c.name} 등장`); render(); return true;
+}
+
+async function trapPhase(di,trig,mod,ctx){
+  const d=G.p[di]; if(d.trapUsed) return;
+  const traps=d.hand.filter(c=>c.kind==='trap'&&c.trig===trig); if(!traps.length) return;
+  let pick=null;
+  if(d.isAI) pick=aiTrap(di,traps,trig,ctx);
+  else{
+    const uniq=[]; for(const c of traps) if(!uniq.some(u=>u.id===c.id)) uniq.push(c);
+    const msg=trig==='attack'?`상대 <b>${jo(ctx.attacker.c.name,'이','가')}</b> <b>${jo(ctx.atk.name,'을','를')}</b> 쓰려 해!<br>예상 데미지 <b>${ctx.est}</b>`:`상대가 <b>${jo(ctx.card.name,'을','를')}</b> 쓰려 해!`;
+    pick=await modal(`<div class="mtext">🪤 함정 카드를 쓸까?<br><br>${msg}</div>`,
+      [...uniq.map(c=>({v:c,label:`${c.icon} ${c.name} — ${c.txt.split(': ')[1]||c.txt}`,cls:'red'})),{v:null,label:'안 쓸래',cls:'gray'}]);
+  }
+  if(!pick) return;
+  d.hand.splice(d.hand.indexOf(pick),1); d.discard.push(pick); d.trapUsed=true; stat(di,'traps');
+  log(`🪤 ${d.name}의 함정! ${pick.name}`); render();
+  await banner(`🪤 함정 발동! ${pick.icon} ${pick.name}`,900);
+  switch(pick.id){
+    case 'wall': mod.reduce=(mod.reduce||0)+50; break;
+    case 'mirror': mod.reflect=(mod.reflect||0)+40; break;
+    case 'paratrap': mod.para=true; break;
+    case 'dodge': if(await coin('긴급회피!')) mod.cancel=true; else log('회피 실패!'); break;
+    case 'counter': mod.cancel=true; break;
+  }
+}
+
+async function doAttack(si,idx){
+  if(!canAttack(si,idx)) return;
+  const s=G.p[si], o=G.p[1-si], m=s.active, atk=m.c.atks[idx], e=atk.eff||{};
+  log(`${m.c.name}의 ${atk.name}!`); render();
+  await banner(`${m.c.name}의 ${atk.name}!`,650);
+  let head=false; if(e.coinPlus||e.para==='coin') head=await coin(atk.name);
+  const def=o.active;
+  const est=calcDmg(s,m,atk,def,head);
+  const mod={}; await trapPhase(1-si,'attack',mod,{attacker:m,atk,est});
+  if(G.over) return;
+  if(mod.cancel){ log('공격이 빗나갔다!'); }
+  else{
+    const d=Math.max(0,est-(mod.reduce||0));
+    if(d>0){ def.dmg+=d; def.hitAt=Date.now(); def.hitD=d; log(`${def.c.name}에게 ${d} 데미지!${def.c.weak===m.c.type?' (약점!)':''}`); }
+    else if(atk.dmg>0) log(`${jo(def.c.name,'은','는')} 데미지를 받지 않았다`);
+    if(e.heal) heal(m,e.heal);
+    if(e.healTeam) mons(s).forEach(x=>heal(x,e.healTeam));
+    if(e.poison) setSt(def,'poison');
+    if(e.burn) setSt(def,'burn');
+    if(e.sleep) setSt(def,'sleep');
+    if(e.para===1||(e.para==='coin'&&head)) setSt(def,'para');
+    if(e.benchAll) o.bench.forEach(x=>{x.dmg+=e.benchAll;x.hitAt=Date.now();x.hitD=e.benchAll;});
+    if(e.recoil) m.dmg+=e.recoil;
+    if(e.discard) for(let i=0;i<e.discard&&m.energy.length;i++){ const x=m.energy.pop(); if(x.card) s.discard.push(x.card); }
+    if(e.draw) draw(s,e.draw);
+    if(e.shield) m.shield=e.shield;
+  }
+  if(mod.reflect){ m.dmg+=mod.reflect; m.hitAt=Date.now(); m.hitD=mod.reflect; log(`반사! ${m.c.name}에게 ${mod.reflect} 데미지`); }
+  if(mod.para){ setSt(m,'para'); log(`${jo(m.c.name,'이','가')} 마비됐다!`); }
+  render(); await wait(700);
+  await checkKOs();
+}
+
+async function checkKOs(){
+  for(const si of [ME,AI]){
+    const s=G.p[si], o=G.p[1-si];
+    for(const m of mons(s)){
+      if(m.dmg<m.c.hp) continue;
+      const pts=(m.c.ex||m.c.legend)?2:1; o.points+=pts;
+      log(`💫 ${m.c.name} 기절! ${o.name} +${pts}점`);
+      if(1-si===ME&&G.cur===ME){ stat(ME,'kos'); const a=G.p[ME].active; if(a&&a!==m&&(a.c.ex||a.c.legend)) stat(ME,'big'); }
+      s.discard.push(m.c,...m.under,...m.energy.filter(e=>e.card).map(e=>e.card));
+      if(s.active===m) s.active=null; else s.bench.splice(s.bench.indexOf(m),1);
+      render(); await banner(`💫 ${m.c.name} 기절! (${o.name} +${pts}점)`,850);
+    }
+  }
+  const a=G.p[ME].points>=WIN_POINTS, b=G.p[AI].points>=WIN_POINTS;
+  if(a||b) return endGame(a&&b?G.cur:a?ME:AI,`${WIN_POINTS}점 달성!`);
+  for(const si of [G.cur,1-G.cur]){
+    const s=G.p[si]; if(s.active) continue;
+    if(!s.bench.length) return endGame(1-si,`${s.name}의 포켓몬이 모두 기절!`);
+    const nm=await pickMon(si,s.bench,'배틀 자리에 낼 포켓몬을 골라',m=>readyScore(m)*100+(m.c.hp-m.dmg),false);
+    s.bench.splice(s.bench.indexOf(nm),1); s.active=nm; log(`${s.name}: ${nm.c.name} 등장!`); render();
+  }
+}
+
+async function endGame(w,reason){
+  if(G.over) return; G.over=true; G.busy=true; G.winner=w; chooser=null;
+  const win=w===ME;
+  if(G.test) return;
+  render(); hidePrompt();
+  if(win){ S.cr+=G.opp.reward; S.st.wins++; S.st.beat[G.opp.id]=1; }
+  save();
+  await wait(500);
+  await modal(`<div class="mtext" style="font-size:20px"><b style="font-size:32px">${win?'🏆 승리!':'😢 패배...'}</b><br>${reason||''}${win?`<br><br><span class="cr">💎 +${G.opp.reward}</span>`:''}</div>`,[{v:1,label:'홈으로'}]);
+  goHome();
+}
+
+// ================= 컴퓨터 =================
+function readyScore(m){ return (m.c.atks.some(a=>canPay(m.energy,a.cost))?3:0)+m.energy.length*.5+(m.c.hp-m.dmg)/100; }
+function energyScore(s,m,t){
+  let best=0;
+  for(const a of m.c.atks){ const l=lack(m.energy,a.cost); if(l===0) continue; const l2=lack([...m.energy,{t}],a.cost); if(l2<l) best=Math.max(best,(a.dmg+10)/(l2+1)); }
+  if(best>0&&m===s.active) best+=25;
+  if(best>0&&s.hand.some(c=>c.kind==='poke'&&c.from===m.c.name)) best+=10;
+  return best;
+}
+function aiEnergyTarget(s,t,strict){
+  const ms=mons(s); if(!ms.length) return null;
+  const sc=ms.map(m=>[m,energyScore(s,m,t)]).sort((a,b)=>b[1]-a[1]);
+  if(sc[0][1]>0) return sc[0][0];
+  if(strict) return null;
+  return s.active||ms[0];
+}
+function bestAttack(si){
+  const s=G.p[si], o=G.p[1-si], m=s.active; if(!m) return null;
+  let best=null, bs=-1;
+  m.c.atks.forEach((a,i)=>{ if(!canAttack(si,i)) return;
+    const d=calcDmg(s,m,a,o.active,false); let sc=d;
+    if(o.active&&d>=o.active.c.hp-o.active.dmg) sc+=1000;
+    if(d===0) sc=a.eff?5:1;
+    if(a.eff&&a.eff.recoil>=999&&sc<1000) sc=0;
+    if(sc>bs){bs=sc;best=i;} });
+  return bs>0?best:null;
+}
+function aiPickTrainer(si){
+  const s=G.p[si], o=G.p[1-si];
+  const has=id=>s.hand.find(c=>c.id===id&&canUse(si,c));
+  if(has('misty')&&mons(s).some(m=>m.c.type==='W'&&energyScore(s,m,'W')>0)) return has('misty');
+  if(has('brock')&&mons(s).some(m=>m.dmg>=50)) return has('brock');
+  if(has('rocket')&&s.active){
+    const m=s.active, ok=o.bench.some(b=>m.c.atks.some(a=>canPay([...m.energy,{t:s.curE||'C'}],a.cost)&&calcDmg(s,m,a,b,false)>=b.c.hp-b.dmg));
+    if(ok) return has('rocket');
+  }
+  if(has('oak')&&s.hand.length<=3) return has('oak');
+  if(has('ash')&&s.hand.length<=8) return has('ash');
+  return null;
+}
+function aiTrap(di,traps,trig,ctx){
+  const has=id=>traps.find(c=>c.id===id);
+  if(trig==='card') return (ctx.card.kind==='trainer'||ctx.card.id==='candy')&&Math.random()<.7?has('counter'):null;
+  const def=G.p[di].active; if(!def) return null;
+  const left=def.c.hp-def.dmg, est=ctx.est;
+  if(est>=left){ if(has('wall')&&est-50<left) return has('wall'); return has('dodge')||has('mirror')||has('wall')||has('paratrap')||null; }
+  if(est>=50) return has('wall')||has('paratrap')||has('mirror')||null;
+  if(has('mirror')&&ctx.attacker.c.hp-ctx.attacker.dmg<=40) return has('mirror');
+  return null;
+}
+async function aiTurn(si){
+  const s=G.p[si], o=G.p[1-si];
+  const step=async()=>{render();await wait(420);};
+  const playBasics=async()=>{ for(const c of s.hand.filter(isBasic)){ if(s.bench.length>=BENCH_MAX) break; playBasic(si,c); await step(); } };
+  const evolveAll=async()=>{ let did=true; while(did&&!G.over){ did=false;
+      for(const c of s.hand.filter(c=>c.kind==='poke'&&c.stage>0)){ const ts=evoTargets(s,c); if(ts.length){ ts.sort(a=>a===s.active?-1:1); evolve(si,c,ts[0]); await step(); did=true; break; } }
+      if(!did){ const cd=s.hand.find(c=>c.id==='candy'); if(cd&&canUse(si,cd)){ await useCard(si,cd); await step(); did=true; } } } };
+  await wait(400);
+  while(!G.over){ const pb=s.hand.find(c=>c.id==='pokeball'); if(!pb||!canUse(si,pb)||s.bench.length>=BENCH_MAX) break; await useCard(si,pb); await step(); }
+  await playBasics(); await evolveAll(); if(G.over) return;
+  for(const c of s.hand.slice()){
+    if(G.over) return; if(!s.hand.includes(c)||!canUse(si,c)) continue;
+    if(c.id==='potion'&&mons(s).some(m=>m.dmg>=30)){ await useCard(si,c); await step(); }
+    else if(c.id==='fullheal'&&s.active&&s.active.status){ await useCard(si,c); await step(); }
+    else if(c.id==='eretrieve'&&!s.hand.some(x=>x.kind==='energy')){ await useCard(si,c); await step(); }
+  }
+  if(!s.trUsed){ const tr=aiPickTrainer(si); if(tr){ await useCard(si,tr); await step(); if(G.over) return; await playBasics(); await evolveAll(); } }
+  if(G.over) return;
+  // 교체 / 후퇴
+  if(s.active&&s.bench.length){
+    const a=s.active, stuck=a.status==='sleep'||a.status==='para';
+    const canNow=a.c.atks.some(x=>canPay(a.energy,x.cost)), lk=Math.min(...a.c.atks.map(x=>lack(a.energy,x.cost)));
+    const ready=s.bench.filter(m=>m.c.atks.some(x=>canPay(m.energy,x.cost)));
+    if(ready.length&&(stuck||(!canNow&&lk>=2)||(!canNow&&a.c.hp-a.dmg<=30))){
+      const sw=s.hand.find(c=>c.id==='switch');
+      if(sw&&canUse(si,sw)){ await useCard(si,sw); await step(); }
+      else if(!stuck&&canRetreat(si)&&a.energy.length-a.c.ret<=1){ await retreat(si); await step(); }
+    }
+  }
+  // 에너지
+  if(s.curE&&!s.eUsed&&mons(s).length){ attachAuto(si,aiEnergyTarget(s,s.curE)); await step(); }
+  if(!s.eCardUsed){ const ecs=s.hand.filter(c=>c.kind==='energy');
+    if(ecs.length){ let pick=null; for(const ec of ecs){ const m=aiEnergyTarget(s,ec.etype,true); if(m){pick=[m,ec];break;} }
+      if(!pick) pick=[aiEnergyTarget(s,ecs[0].etype),ecs[0]];
+      if(pick[0]){ attachCard(si,pick[0],pick[1]); await step(); } } }
+  if(G.over||G.turnNo===1) return;
+  const bi=bestAttack(si); if(bi===null) return;
+  const atk=s.active.c.atks[bi];
+  if(atk.dmg>0&&o.active){
+    const left=o.active.c.hp-o.active.dmg;
+    if(calcDmg(s,s.active,atk,o.active,false)<left){
+      const xa=s.hand.find(c=>c.id==='xattack'); if(xa&&canUse(si,xa)){ await useCard(si,xa); await step(); }
+      const ga=s.hand.find(c=>c.id==='gary'); if(ga&&canUse(si,ga)&&calcDmg(s,s.active,atk,o.active,false)<left){ await useCard(si,ga); await step(); }
+    }
+  }
+  if(G.over) return;
+  await doAttack(si,bi);
+}
+
+// ================= 배틀 화면 =================
+function monHTML(m,big){
+  const c=m.c, t=T[c.type], hp=Math.max(0,c.hp-m.dmg), pct=hp/c.hp*100;
+  const pick=chooser&&chooser.ids.has(m.uid)?' pick':'';
+  const hit=Date.now()-m.hitAt<700;
+  return `<div class="mon${big?' big':''}${pick}${hit?' hit':''}" data-uid="${m.uid}" style="--tc:${t.c};--tcl:${t.l}">
+    <img src="${ART(c.dex)}" onerror="this.style.visibility='hidden'">
+    <div class="hpt">${hp}</div>${c.ex||c.legend?`<div class="tag">${c.legend?'★':'ex'}</div>`:''}
+    <div class="ens">${m.energy.map(e=>eIco(e.t)).join('')}</div>
+    ${m.status?`<div class="st">${ST[m.status]}</div>`:''}${m.shield?`<div class="sh">🛡${m.shield}</div>`:''}
+    <div class="hpb"><i style="width:${pct}%;background:${pct>50?'#43a047':pct>25?'#fbc02d':'#e53935'}"></i></div>
+    <div class="nm">${c.name}</div>${hit?`<div class="dpop">-${m.hitD}</div>`:''}</div>`;
+}
+const benchHTML=s=>{let h='';for(let i=0;i<BENCH_MAX;i++) h+=s.bench[i]?monHTML(s.bench[i]):'<div class="slot"></div>';return h;};
+const ptsHTML=n=>'●'.repeat(Math.min(n,WIN_POINTS))+'○'.repeat(Math.max(0,WIN_POINTS-n));
+function myTurn(){ return G&&!G.over&&G.phase==='play'&&G.cur===ME&&!G.busy&&!G.p[ME].isAI; }
+function render(){
+  if(!G||G.test) return;
+  const me=G.p[ME], op=G.p[AI];
+  $('#oppInfo').innerHTML=`<span>${G.opp.icon} <b>${op.name}</b> ${op.etypes.map(t=>T[t].e).join('')}</span><span class="pts">${ptsHTML(op.points)}</span><span>🂠${op.hand.length} 📚${op.deck.length}</span>`;
+  $('#meInfo').innerHTML=`<span>🙂 <b>나</b> ${me.etypes.map(t=>T[t].e).join('')}</span><span class="pts">${ptsHTML(me.points)}</span><span>📚${me.deck.length} 🗑️${me.discard.length}</span>`;
+  $('#oppBench').innerHTML=benchHTML(op);
+  $('#oppActive').innerHTML=op.active?monHTML(op.active,true):'<div class="slot big"></div>';
+  $('#meActive').innerHTML=me.active?monHTML(me.active,true):'<div class="slot big"></div>';
+  $('#meBench').innerHTML=benchHTML(me);
+  const ez=$('#ezone');
+  if(me.curE){ ez.className=myTurn()?'on':''; ez.style.setProperty('--ec',T[me.curE].c); ez.innerHTML=T[me.curE].e+'<span class="lb">눌러서 붙이기</span>'; }
+  else { ez.className=''; ez.innerHTML=`<span class="lb">${G.cur===ME&&me.eUsed?'붙였음':'에너지존'}</span>`; }
+  $('#log').innerHTML=G.log.slice(-3).map(t=>`<div>${t}</div>`).join('');
+  $('#endBtn').disabled=!myTurn();
+  $('#endBtn').style.visibility=G.phase==='setup'?'hidden':'visible';
+  $('#setupBar').classList.toggle('on',G.phase==='setup');
+  $('#readyBtn').disabled=!me.active;
+  $('#hand').innerHTML=me.hand.map(c=>handCardHTML(c,G.phase==='setup'?!isBasic(c):!handPlayable(c))).join('');
+}
+function handPlayable(c){
+  if(!myTurn()) return false; const s=G.p[ME];
+  if(c.kind==='poke') return c.stage===0?s.bench.length<BENCH_MAX:evoTargets(s,c).length>0;
+  if(c.kind==='energy') return !s.eCardUsed&&mons(s).length>0;
+  if(c.kind==='trap') return false;
+  return canUse(ME,c);
+}
+function chooseMon(list,msg,cancel){
+  return new Promise(res=>{ chooser={ids:new Set(list.map(m=>m.uid)),res}; $('#promptTx').textContent='👉 '+msg; $('#promptCancel').style.display=cancel?'':'none'; $('#prompt').classList.add('on'); render(); });
+}
+function hidePrompt(){ $('#prompt').classList.remove('on'); }
+function resolveChooser(v){ const c=chooser; chooser=null; hidePrompt(); render(); if(c) c.res(v); }
+async function banner(text,ms=900){ if(G&&G.test) return; const b=$('#banner'); b.textContent=text; b.classList.add('on'); await wait(ms); b.classList.remove('on'); }
+async function coin(label){
+  const h=Math.random()<.5; if(G&&G.test) return h;
+  const c=$('#coin'); $('#coinTx').textContent='🪙 '+label; c.classList.add('on'); await wait(550);
+  $('#coinTx').textContent=(h?'앞면!':'뒷면…')+' — '+label; await wait(650); c.classList.remove('on'); return h;
+}
+async function act(fn){
+  if(!G||G.busy) return; G.busy=true; render();
+  try{ await fn(); } finally{ if(G&&!G.over&&G.cur===ME&&!G.p[ME].isAI&&G.phase==='play'){ G.busy=false; render(); } }
+}
+
+// 배틀 화면 터치
+$('#battle').addEventListener('click',e=>{
+  if(!G||G.over) return;
+  const me=e.target.closest('.mon'), hc=e.target.closest('.hc');
+  if(me) return onMonClick(+me.dataset.uid);
+  if(hc) return onHandClick(+hc.dataset.uid);
+  if(e.target.closest('#ezone')) return onEnergyZone();
+});
+$('#promptCancel').onclick=()=>resolveChooser(null);
+$('#endBtn').onclick=()=>{ if(myTurn()) act(endTurn); };
+$('#readyBtn').onclick=()=>{ if(G&&G.phase==='setup'&&G.p[ME].active&&setupDone){ const f=setupDone; setupDone=null; f(); } };
+
+async function onMonClick(uid){
+  const m=findMon(uid); if(!m) return;
+  if(chooser){ if(chooser.ids.has(uid)) resolveChooser(m); return; }
+  const me=G.p[ME], mine=ownerOf(m)===ME;
+  if(G.phase==='setup'){ // 놓은 걸 다시 패로
+    if(!mine) return;
+    if(me.active===m){ me.hand.push(m.c); me.active=me.bench.shift()||null; }
+    else { me.bench.splice(me.bench.indexOf(m),1); me.hand.push(m.c); }
+    return render();
+  }
+  const btns=[];
+  if(mine&&myTurn()&&me.active===m){
+    m.c.atks.forEach((a,i)=>btns.push({v:'a'+i,label:`⚔️ ${a.name}${a.dmg?' ('+(calcDmg(me,m,a,G.p[AI].active,false))+')':''}`,dis:!canAttack(ME,i)}));
+    btns.push({v:'r',label:`🏃 후퇴 (에너지 ${m.c.ret}개 버림)`,cls:'gray',dis:!canRetreat(ME)});
+    if(G.turnNo===1) btns.unshift({v:null,label:'선공 첫 턴엔 공격 못 해',cls:'gray',dis:true});
+  }
+  btns.push({v:null,label:'닫기',cls:'gray'});
+  const v=await modal(bigCardHTML(m.c,m),btns,{dismiss:true});
+  if(!v) return;
+  if(v[0]==='a') act(async()=>{ await doAttack(ME,+v.slice(1)); if(!G.over) await endTurn(); });
+  else if(v==='r') act(()=>retreat(ME));
+}
+async function onHandClick(uid){
+  const s=G.p[ME], c=s.hand.find(x=>x.uid===uid); if(!c||chooser) return;
+  if(G.phase==='setup'){ if(isBasic(c)&&(!s.active||s.bench.length<BENCH_MAX)){ placeBasic(s,c); render(); } return; }
+  let btn=null;
+  if(c.kind==='poke') btn=c.stage===0?{v:'basic',label:'벤치에 내기'}:{v:'evo',label:'진화하기'};
+  else if(c.kind==='energy') btn={v:'energy',label:s.eCardUsed?'이번 턴엔 이미 붙였어':'포켓몬에게 붙이기'};
+  else if(c.kind==='trainer') btn={v:'use',label:s.trUsed?'트레이너는 턴에 1장만!':'사용하기'};
+  else if(c.kind==='magic') btn={v:'use',label:'사용하기'};
+  const btns=[]; if(btn){ btn.dis=!handPlayable(c); btns.push(btn); }
+  btns.push({v:null,label:'닫기',cls:'gray'});
+  const v=await modal(bigCardHTML(c),btns,{dismiss:true});
+  if(!v) return;
+  act(async()=>{
+    if(v==='basic'){ playBasic(ME,c); render(); }
+    else if(v==='evo'){ const t=await pickMon(ME,evoTargets(s,c),`${jo(c.name,'으로','로')} 진화할 포켓몬을 골라`); if(t) evolve(ME,c,t); render(); }
+    else if(v==='energy'){ const t=await pickMon(ME,mons(s),'에너지를 붙일 포켓몬을 골라'); if(t) attachCard(ME,t,c); render(); }
+    else if(v==='use'){ await useCard(ME,c); }
+  });
+}
+function onEnergyZone(){
+  const s=G.p[ME]; if(!myTurn()||!s.curE||s.eUsed) return;
+  act(async()=>{ const t=await pickMon(ME,mons(s),`${T[s.curE].e}에너지를 붙일 포켓몬을 골라`); if(t) attachAuto(ME,t); render(); });
+}
+
+// ================= 덱 편집 =================
+let D=null, DE=null, dTab='all', dDirty=false;
+function catOf(c){ return c.kind==='poke'?'poke':c.kind; }
+function validate(deck,etypes){
+  const n={total:0,poke:0,energy:0,trainer:0,magic:0,trap:0,legend:0,basic:0}, errs=[];
+  for(const [id,k] of Object.entries(deck)){ const c=C[id]; if(!c||!k) continue;
+    n.total+=k; n[catOf(c)]+=k; if(c.legend) n.legend+=k; if(isBasic(c)) n.basic+=k;
+    if(c.kind!=='energy'){ if(k>LIMIT.copy) errs.push(`${c.name}: 같은 카드는 ${LIMIT.copy}장까지`); if(k>(S.col[id]||0)) errs.push(`${c.name}: 가진 카드보다 많아`); } }
+  if(n.total!==LIMIT.deck) errs.push(`덱은 딱 ${LIMIT.deck}장이어야 해 (지금 ${n.total}장)`);
+  for(const k of ['energy','trainer','magic','trap']) if(n[k]>LIMIT[k]) errs.push(`${KIND[k]}: ${LIMIT[k]}장까지`);
+  if(n.legend>LIMIT.legend) errs.push(`전설은 ${LIMIT.legend}장까지`);
+  if(!n.basic) errs.push('기본 포켓몬이 최소 1장 있어야 해');
+  if(!etypes.length||etypes.length>LIMIT.etypes) errs.push(`자동 에너지 타입은 1~${LIMIT.etypes}개`);
+  return {ok:!errs.length,errs,n};
+}
+function openDeck(){ D={...S.deck}; DE=[...S.etypes]; dDirty=false; dTab='all'; show('deck'); renderDeck(); }
+function renderDeck(){
+  const v=validate(D,DE), n=v.n;
+  const f=(lb,x,lim)=>`<span>${lb} <b class="${lim!=null&&x>lim?'bad':''}">${x}${lim!=null?'/'+lim:''}</b></span>`;
+  $('#dsum').innerHTML=`<span>총 <b class="${n.total===LIMIT.deck?'ok':'bad'}">${n.total}/${LIMIT.deck}</b></span>`+f('포켓몬',n.poke)+f('⭐전설',n.legend,LIMIT.legend)+f('에너지',n.energy,LIMIT.energy)+f('트레이너',n.trainer,LIMIT.trainer)+f('마법',n.magic,LIMIT.magic)+f('함정',n.trap,LIMIT.trap);
+  $('#etrow').innerHTML='자동 에너지 (1~3개): '+[...ETYPES].map(t=>`<button class="etb${DE.includes(t)?' on':''}" style="--ec:${T[t].c}" onclick="toggleE('${t}')">${T[t].e}</button>`).join('');
+  const tabs=[['all','전체'],['in','덱에 넣은 것'],['poke','포켓몬'],['energy','에너지'],['trainer','트레이너'],['magic','마법'],['trap','함정']];
+  $('#dtabs').innerHTML=tabs.map(([k,l])=>`<button class="tab${dTab===k?' on':''}" onclick="dTab='${k}';renderDeck()">${l}</button>`).join('');
+  const list=CARDS.filter(c=>(c.kind==='energy'||S.col[c.id])&&(dTab==='all'||(dTab==='in'?D[c.id]:catOf(c)===dTab)));
+  $('#dlist').innerHTML=list.map(c=>{ const k=D[c.id]||0, own=c.kind==='energy'?'∞':S.col[c.id];
+    const sub=c.kind==='poke'?`${T[c.type].e} ${STAGE[c.stage]} · HP ${c.hp}${c.legend?' · ★전설':c.ex?' · ex':''}`:KIND[c.kind];
+    return `<div class="crow${k?' in':''}"><div onclick="cardInfo('${c.id}')">${handCardHTML(c)}</div>
+      <div class="inf" onclick="cardInfo('${c.id}')"><b>${c.name}</b> <span class="rar">${rarTxt(c.rar)}</span><div class="sub">${sub} · 보유 ${own}</div></div>
+      <div class="cnt"><button onclick="dAdd('${c.id}',-1)">−</button><b>${k}</b><button onclick="dAdd('${c.id}',1)">+</button></div></div>`; }).join('')||'<p style="color:var(--sub);text-align:center">카드가 없어</p>';
+}
+function dAdd(id,d){ const c=C[id], k=(D[id]||0)+d; if(k<0) return;
+  if(d>0&&c.kind!=='energy'&&(k>LIMIT.copy||k>(S.col[id]||0))) return;
+  if(k) D[id]=k; else delete D[id]; dDirty=true; renderDeck(); }
+function toggleE(t){ const i=DE.indexOf(t); if(i>=0){ if(DE.length>1) DE.splice(i,1); } else if(DE.length<LIMIT.etypes) DE.push(t); dDirty=true; renderDeck(); }
+function cardInfo(id){ modal(bigCardHTML(C[id]),[{v:1,label:'닫기',cls:'gray'}],{dismiss:true}); }
+async function saveDeck(){
+  const v=validate(D,DE);
+  if(!v.ok) return alertBox('아직 저장 못 해!<br><small>'+v.errs.join('<br>')+'</small>');
+  S.deck={...D}; S.etypes=[...DE]; S.st.saved=1; save(); dDirty=false;
+  await alertBox('덱 저장 완료! 🃏');
+}
+async function leaveDeck(){
+  if(dDirty){ const v=await modal('<div class="mtext">저장 안 한 변경이 있어. 그냥 나갈까?</div>',[{v:1,label:'그냥 나가기',cls:'red'},{v:0,label:'계속 편집',cls:'gray'}]); if(!v) return; }
+  goHome();
+}
+
+// ================= 카드팩 =================
+function rollRar(w){ let r=Math.random()*w.reduce((a,b)=>a+b,0); for(let i=0;i<w.length;i++){ r-=w[i]; if(r<0) return i+1; } return 1; }
+function rollPack(){
+  const pool=r=>CARDS.filter(c=>c.kind!=='energy'&&c.rar===r);
+  const out=[];
+  for(let i=0;i<PACK_SIZE;i++){
+    const r=i<PACK_SIZE-2?rollRar([85,15,0,0]):i===PACK_SIZE-2?rollRar([45,45,10,0]):rollRar([0,60,30,10]);
+    const p=pool(r); out.push(p[Math.random()*p.length|0]);
+  }
+  return out;
+}
+function openPack(){ show('pack'); renderPackHome(); }
+function renderPackHome(){
+  $('#packCr').textContent='💎 '+S.cr;
+  $('#packBody').innerHTML=`<div class="packbox">🎁<span>포켓몬 카드팩</span></div>
+    <button class="btn gold" ${S.cr<PACK_COST?'disabled':''} onclick="buyPack()">팩 까기 (💎 ${PACK_COST})</button>
+    <div style="color:var(--sub);font-size:13px;text-align:center;line-height:1.6">한 팩에 ${PACK_SIZE}장 · 마지막 장은 ◆◆ 이상 확정<br>크리스탈은 대전에서 이기거나 미션을 깨면 받아!</div>`;
+}
+let packCards=[];
+function buyPack(){
+  if(S.cr<PACK_COST) return;
+  S.cr-=PACK_COST; packCards=rollPack().map(c=>({c,isNew:!S.col[c.id],open:false}));
+  for(const p of packCards) S.col[p.c.id]=(S.col[p.c.id]||0)+1;
+  S.st.packs++; save(); renderPackOpen();
+}
+function renderPackOpen(){
+  $('#packCr').textContent='💎 '+S.cr;
+  const all=packCards.every(p=>p.open);
+  $('#packBody').innerHTML=`<div style="font-weight:800">카드를 눌러서 뒤집어 봐!</div><div class="pgrid">${packCards.map((p,i)=>`<div class="pcard" onclick="flipCard(${i})">
+    ${p.open?`${p.isNew?'<span class="new">NEW</span>':''}${handCardHTML(p.c)}<div class="r">${rarTxt(p.c.rar)}</div>`:'<div class="back">⚡</div>'}</div>`).join('')}</div>
+    ${all?`<button class="btn gold" ${S.cr<PACK_COST?'disabled':''} onclick="buyPack()">한 팩 더 (💎 ${PACK_COST})</button><button class="btn gray" onclick="renderPackHome()">확인</button>`:'<button class="btn gray" onclick="packCards.forEach(p=>p.open=true);renderPackOpen()">모두 열기</button>'}`;
+}
+function flipCard(i){ const p=packCards[i]; if(!p.open){ p.open=true; renderPackOpen(); } else cardInfo(p.c.id); }
+
+// ================= 미션 =================
+function openMissions(){ show('missions'); renderMissions(); }
+function renderMissions(){
+  $('#misCr').textContent='💎 '+S.cr;
+  $('#misList').innerHTML=MISSIONS.map(m=>{ const v=Math.min(m.v(S),m.goal), done=S.claimed[m.id], ok=v>=m.goal;
+    return `<div class="mis${done?' done':''}"><div class="inf"><b>${m.name}</b><div class="sub">${v}/${m.goal} · 보상 💎${m.r}</div><div class="bar"><i style="width:${v/m.goal*100}%"></i></div></div>
+      ${done?'✅':`<button class="btn gold" ${ok?'':'disabled'} onclick="claim('${m.id}')">받기</button>`}</div>`; }).join('');
+}
+function claim(id){ const m=MISSIONS.find(x=>x.id===id); if(S.claimed[id]||m.v(S)<m.goal) return; S.claimed[id]=1; S.cr+=m.r; save(); renderMissions(); }
+
+// ================= 자동 테스트 (개발용: 콘솔에서 autoTest(20)) =================
+async function autoTest(n=10,oppIdx=null){
+  const old=SPEED; SPEED=0; const res={me:0,ai:0,turns:[],errors:[]};
+  for(let i=0;i<n;i++){
+    const opp=OPPS[oppIdx??(i%OPPS.length)];
+    try{ await startBattle(opp,{test:true,meDeck:STARTER,meE:STARTER_E}); if(!G.over) throw new Error('끝나지 않음');
+      res[G.winner===ME?'me':'ai']++; res.turns.push(G.turnNo); }
+    catch(e){ res.errors.push(String(e&&e.stack||e)); }
+  }
+  SPEED=old; G=null; return res;
+}
+
+// 모바일 확대 막기
+document.addEventListener('gesturestart',e=>e.preventDefault());
+document.addEventListener('dblclick',e=>e.preventDefault());
+let lastTouch=0; document.addEventListener('touchend',e=>{const t=Date.now(); if(t-lastTouch<300) e.preventDefault(); lastTouch=t;},{passive:false});
+
+goHome();
+</script>
+</body>
+</html>
