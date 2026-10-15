@@ -217,6 +217,35 @@ button{font:inherit;color:inherit;border:0;cursor:pointer;background:none}
 .mon .sh{position:absolute;top:13px;right:3px;font-size:9px;background:#1565c0;color:#fff;border-radius:6px;padding:0 3px}
 .mon.pick{box-shadow:0 0 0 3px #ffeb3b,0 0 18px #ffeb3b;animation:pulse .7s infinite alternate}
 .mon.hit{animation:shake .4s}
+/* 진짜 카드 그림 */
+.pc.real{padding:0;overflow:hidden}
+.rtop{width:100%;aspect-ratio:734/525;background-size:100% auto;background-position:top center;background-repeat:no-repeat}
+.pc.real.gx .rtop{aspect-ratio:734/490}
+.pc.real>.rbot{margin:0 8px 8px;border-radius:0 0 6px 6px;min-height:0;padding-top:2px}
+.hc.real{padding:0;background:none;box-shadow:0 2px 4px rgba(0,0,0,.45);border-radius:5px;overflow:hidden}
+.hc.real .cimg,.mon.real .cimg{width:100%;height:100%;object-fit:cover;object-position:top;display:block}
+.mon.real{padding:0;background:#f2c51d;overflow:hidden;border-radius:6px}
+.mon.real .rhp{position:absolute;top:2px;right:2px;font-size:11px;font-weight:900;background:rgba(255,255,255,.95);color:#c62828;border-radius:6px;padding:0 4px;box-shadow:0 1px 2px rgba(0,0,0,.4)}
+.mon.real.big .rhp{font-size:14px}
+.mon.real .hpb{position:absolute;left:2px;right:2px;bottom:2px;height:5px;background:rgba(0,0,0,.4);border-radius:3px;overflow:hidden}
+.mon.real .hpb i{display:block;height:100%}
+.mon.real .ens{top:auto;bottom:9px;left:2px}
+.mon.real .st{bottom:auto;top:20px}
+.rcrop{width:100%;aspect-ratio:734/525;background-size:100% auto;background-position:top center;background-repeat:no-repeat;flex:0 0 auto}
+.gx>.rcrop{aspect-ratio:734/490}
+.hc.real{display:flex;flex-direction:column;background:linear-gradient(160deg,#ffe26a,#f2c51d 50%,#f9d846)}
+.hc.real.gx{background:linear-gradient(135deg,#f3f5f6,#aeb8be 35%,#ffffff 52%,#98a3aa 75%,#e8ecee)}
+.rmini{flex:1;margin:0 2px 2px;border-radius:0 0 3px 3px;background:var(--bg);display:flex;flex-direction:column;justify-content:space-evenly;padding:1px 2px;min-height:0;overflow:hidden}
+.rmini div{display:flex;justify-content:space-between;align-items:center}
+.rmini span{display:flex;gap:0}
+.rmini .eico{width:8px;height:8px;font-size:5px;border-width:.5px;box-shadow:none}
+.rmini b{font-size:8px;font-weight:900;color:#111}
+.pcard .rmini .eico{width:11px;height:11px;font-size:7px}
+.pcard .rmini b{font-size:10px}
+.crow .hc .rmini{display:none}
+.mon.real{display:flex;flex-direction:column}
+.mon.real.gx{background:linear-gradient(135deg,#f3f5f6,#aeb8be 35%,#ffffff 52%,#98a3aa 75%,#e8ecee)}
+.rinfo{flex:1;margin:0 2px 2px;border-radius:0 0 3px 3px;background:var(--bg)}
 </style>
 </head>
 <body>
@@ -401,6 +430,12 @@ P('dragonite','망나뇽',149,'C',170,2,'신뇽',3,2,[['날개치기','C',40],['
 P('dragonitegx','망나뇽GX',149,'C',240,2,'신뇽',4,2,[['드래곤클로','C',50],['용의파동','WL',100],['역린','WLC',160]],{gx:['드래곤러시GX','WLC',230]});
 P('lugia','루기아',249,'C',140,0,null,4,2,[['바람일으키기','C',30],['에어슬래시','CC',70],['에어로블라스트','CCC',120]],{legend:1});
 
+// ----- 진짜 썬문 카드 그림 (pokemontcg.io) : [카드번호, 진짜 HP, 진짜 타입] -----
+const REAL={"bulbasaur":["sm35/1",70,"G"],"ivysaur":["sm35/2",100,"G"],"venusaur":["sm35/3",160,"G"],"caterpie":["sm1/1",50,"G"],"metapod":["sm1/2",80,"G"],"butterfree":["sm1/3",130,"G"],"oddish":["sm3/4",50,"G"],"gloom":["sm3/5",80,"G"],"celebi":["sm11/4",80,"G"],"charmander":["sm3/18",70,"R"],"charmeleon":["sm3/19",90,"R"],"charizard":["sm75/3",160,"R"],"charizardgx":["sm3/20",250,"R"],"vulpix":["sm9/15",60,"R"],"ninetales":["sm9/16",100,"R"],"growlithe":["sm1/21",80,"R"],"arcanine":["sm1/22",130,"R"],"moltres":["sm8/38",120,"R"],"squirtle":["sm9/22",50,"W"],"wartortle":["sm9/24",90,"W"],"blastoise":["sm9/25",160,"W"],"magikarp":["sm3/32",30,"W"],"gyarados":["sm3/33",150,"W"],"gyaradosgx":["sm4/18",240,"W"],"psyduck":["sm1/28",70,"W"],"golduck":["sm1/29",90,"W"],"articuno":["sm9/32",110,"W"],"pikachu":["sm3/40",60,"L"],"raichu":["sm3/41",110,"L"],"pikachugx":["smp/SM232",160,"L"],"voltorb":["sm35/30",60,"L"],"electrode":["sm35/31",90,"L"],"magnemite":["sm5/80",60,"M"],"magneton":["sm5/82",90,"M"],"zapdos":["sm9/40",110,"L"],"gastly":["sm4/36",50,"P"],"haunter":["sm4/37",70,"P"],"gengar":["sm4/38",130,"P"],"mew":["sm10/76",60,"P"],"mewtwogx":["sm35/39",190,"P"],"machop":["sm2/62",70,"F"],"machoke":["sm2/64",100,"F"],"machamp":["sm2/65",160,"F"],"riolu":["sm3/70",70,"F"],"lucario":["sm3/71",120,"F"],"lucariogx":["smp/SM100",210,"F"],"geodude":["sm10/87",70,"F"],"graveler":["sm10/88",110,"F"],"golem":["sm10/89",180,"F"],"murkrow":["sm2/78",70,"D"],"honchkrow":["sm2/79",110,"D"],"houndour":["sm4/58",60,"D"],"houndoom":["sm4/59",110,"D"],"darkrai":["sm3/87",120,"D"],"beldum":["sm2/83",60,"M"],"metang":["sm2/84",90,"M"],"metagross":["sm7/95",170,"M"],"rattata":["sm10/143",30,"C"],"raticate":["sm10/144",70,"C"],"eevee":["sm1/101",60,"C"],"snorlax":["sm10/158",150,"C"],"lugia":["sm9/131",130,"C"]};
+const CARDIMG=(k,big)=>`https://images.pokemontcg.io/${k}${big?'_hires':''}.png`;
+for(const [id,[k,hp,t]] of Object.entries(REAL)){ const c=C[id]; if(!c) continue;
+  if(c.type!==t){ for(const a of c.atks) a.cost=a.cost.split(c.type).join(t); c.type=t; c.weak=WEAK[t]; }
+  c.img=k; c.hp=hp; }
 // --- 트레이너 (사람 카드, 턴에 1장) ---
 X('ash','trainer','지우','🧢',2,'카드를 3장 뽑는다.');
 X('oak','trainer','오박사','👴',2,'패를 모두 덱에 섞고 6장 뽑는다.');
@@ -521,6 +556,13 @@ function bigCardHTML(c,m){
     const atks=c.atks.map(a=>{
       const tx=(a.gx?'GX 기술은 한 판에 1번만 쓸 수 있다.'+(a.eff?' ':''):'')+effText(a.eff);
       return `<div class="pa${a.gx?' gxa':''}"><span class="pc-cost">${costHTML(a.cost)}</span><span class="pa-n">${gxName(a.name)}</span><span class="pa-d">${a.dmg||''}</span>${tx?`<div class="pa-t">${tx}</div>`:''}</div>`;}).join('');
+    if(c.img) return `<div class="pc real${c.gx?' gx':''}${dark?' dark':''}" style="--bg:${typeBg(c.type)}">
+      <div class="rtop" style="background-image:url(${CARDIMG(c.img,1)})"></div><div class="in rbot">
+      <div class="pc-body">${c.abil?`<div class="pab"><span class="abtag">특성</span><b>${c.abil.name}</b><div class="pa-t">${c.abil.txt}</div></div>`:''}${atks}</div>
+      ${m?`<div class="pc-now">남은 HP <b>${c.hp-m.dmg}</b> · 에너지 ${m.energy.map(e=>eIco(e.t)).join('')||'없음'}${m.status?' · '+ST[m.status]:''}</div>`:''}
+      <div class="pc-wrr"><span>약점 ${eIco(c.weak)} +${WEAK_BONUS}</span><span>저항력</span><span>후퇴 ${c.ret?costHTML('C'.repeat(c.ret)):''}</span></div>
+      ${c.gx?'<div class="pc-rule"><b>GX 룰</b> · GX 포켓몬이 기절하면 상대는 사이드를 2장 가져간다.</div>':''}
+      ${footHTML(c)}</div></div>`;
     return `<div class="pc${c.gx?' gx':''}${dark?' dark':''}" style="--bg:${typeBg(c.type)}"><div class="in">
       ${c.gx?`<div class="gxart" style="background-image:url(${ART(c.dex)})"></div>`:''}
       <div class="pc-top"><span class="stg">${STAGE[c.stage]}</span><span class="pn">${gxName(c.name)}</span><span class="php"><small>HP</small>${c.hp}${eIco(c.type,1)}</span></div>
@@ -544,6 +586,8 @@ function bigCardHTML(c,m){
 }
 function handCardHTML(c,dim){
   const d=dim?' dim':'', u=`data-uid="${c.uid||''}" data-id="${c.id}"`;
+  if(c.kind==='poke'&&c.img) return `<div class="hc real${c.gx?' gx':''}${d}" ${u}><div class="rcrop" style="background-image:url(${CARDIMG(c.img)})"></div>
+    <div class="rmini" style="--bg:${typeBg(c.type)}">${c.atks.map(a=>`<div><span>${costHTML(a.cost)}</span><b>${a.dmg||''}</b></div>`).join('')}</div></div>`;
   if(c.kind==='poke') return `<div class="hc${c.gx?' gx':''}${c.type==='D'?' dark':''}${d}" ${u} style="--bg:${typeBg(c.type)}"><div class="in">
     <div class="nm"><span>${c.name}</span><b>${c.hp}</b></div><div class="art"><img src="${ART(c.dex)}" loading="lazy" onerror="this.style.visibility='hidden'"></div>
     <div class="kd">${STAGE[c.stage]}${c.gx?' · GX':''}${c.legend?' ★':''}</div></div></div>`;
@@ -993,6 +1037,12 @@ function monHTML(m,big){
   const c=m.c, hp=Math.max(0,c.hp-m.dmg), pct=hp/c.hp*100;
   const pick=chooser&&chooser.ids.has(m.uid)?' pick':'';
   const hit=Date.now()-m.hitAt<700;
+  if(c.img) return `<div class="mon real${big?' big':''}${c.gx?' gx':''}${pick}${hit?' hit':''}" data-uid="${m.uid}">
+    <div class="rcrop" style="background-image:url(${CARDIMG(c.img)})"></div><span class="rhp">${hp}</span>
+    <div class="rinfo" style="--bg:${typeBg(c.type)}"></div><div class="hpb"><i style="width:${pct}%;background:${pct>50?'#43a047':pct>25?'#fbc02d':'#e53935'}"></i></div>
+    <div class="ens">${m.energy.map(e=>eIco(e.t)).join('')}</div>
+    ${m.status?`<div class="st">${ST[m.status]}</div>`:''}${m.shield?`<div class="sh">🛡${m.shield}</div>`:''}
+    ${hit?`<div class="dpop">-${m.hitD}</div>`:''}</div>`;
   return `<div class="mon${big?' big':''}${c.gx?' gx':''}${c.type==='D'?' dark':''}${pick}${hit?' hit':''}" data-uid="${m.uid}" style="--bg:${typeBg(c.type)}"><div class="in">
     <div class="mtop"><span class="nm">${c.name}</span><span class="hp">${hp}</span></div>
     <div class="art"><img src="${ART(c.dex)}" onerror="this.style.visibility='hidden'"></div>
