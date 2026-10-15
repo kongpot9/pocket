@@ -246,6 +246,16 @@ button{font:inherit;color:inherit;border:0;cursor:pointer;background:none}
 .mon.real{display:flex;flex-direction:column}
 .mon.real.gx{background:linear-gradient(135deg,#f3f5f6,#aeb8be 35%,#ffffff 52%,#98a3aa 75%,#e8ecee)}
 .rinfo{flex:1;margin:0 2px 2px;border-radius:0 0 3px 3px;background:var(--bg)}
+.trc{aspect-ratio:734/540!important}
+.pc.real.tr{background:linear-gradient(160deg,#ffe26a,#f2c51d 50%,#f9d846)}
+.pc.real.tr>.rbot{background:repeating-linear-gradient(90deg,rgba(255,255,255,.35) 0 1px,rgba(0,0,0,.03) 1px 3px),linear-gradient(#f6f8f9,#c5ccd1)}
+.hc.trr{display:flex;flex-direction:column}
+.hc.trr .kd.tag{margin:auto 3px 3px}
+.pick-grid{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;max-height:52vh;overflow-y:auto;padding:6px;width:100%}
+.pk{position:relative;cursor:pointer;border-radius:8px}
+.pk.on{box-shadow:0 0 0 3px #ffeb3b,0 0 12px #ffeb3b}
+.pk .pn{position:absolute;bottom:-4px;left:-4px;background:#333;color:#fff;font-size:10px;border-radius:8px;padding:0 5px}
+.pk .pc2{position:absolute;top:-6px;right:-6px;background:#e53935;color:#fff;font-weight:900;font-size:12px;border-radius:50%;width:20px;height:20px;display:flex;align-items:center;justify-content:center}
 </style>
 </head>
 <body>
@@ -443,6 +453,7 @@ X('brock','trainer','웅','🪨',1,'내 포켓몬 1마리의 HP를 50 회복한�
 X('misty','trainer','이슬','🌊',2,'내 물 포켓몬 1마리에게 💧에너지를 2개 붙인다.');
 X('rocket','trainer','로켓단','🚀',3,'상대 배틀 포켓몬을 상대 벤치 포켓몬과 강제로 바꾼다. (내가 고름)');
 X('gary','trainer','그린','😎',3,'이번 턴, 내 포켓몬 기술 데미지 +30.');
+X('mallow','trainer','마오','🍲',3,'패를 2장 버리고 발동한다. 덱에서 원하는 카드 2장을 패에 넣는다.',{img:'sm2/127'});
 // --- 마법 (도구 카드, 여러 장 가능) ---
 X('switch','magic','교체','🔄',1,'내 배틀 포켓몬을 벤치 포켓몬과 바꾼다.');
 X('pokeball','magic','몬스터볼','⚪',1,'덱에서 기본 포켓몬 1장을 무작위로 패에 넣는다.');
@@ -579,6 +590,8 @@ function bigCardHTML(c,m){
       <div class="ec-hd">기본 에너지</div><div class="ec-orb">${eIco(c.etype,1)}</div><div class="ec-name">${c.name}</div>
       <div class="ec-txt">포켓몬에게 붙여서 기술에 쓴다. 턴에 1장. (자동 에너지와 따로)</div></div></div>`;
   const k=KTAG[c.kind];
+  if(c.img) return `<div class="pc real tr" style="--tag:${k[2]};--tagl:${k[3]}"><div class="rtop trc" style="background-image:url(${CARDIMG(c.img,1)})"></div>
+    <div class="in rbot"><div class="tc-txt">${c.txt}</div><div class="tc-rule">${k[4]}</div>${footHTML(c)}</div></div>`;
   return `<div class="pc tr" style="--tag:${k[2]};--tagl:${k[3]}"><div class="in">
     <div class="tc-hd"><i>${k[0]}</i><span class="tc-tag">${k[1]}</span></div>
     <div class="tc-name">${c.name}</div><div class="tc-art">${c.icon}</div>
@@ -594,6 +607,7 @@ function handCardHTML(c,dim){
   if(c.kind==='energy') return `<div class="hc${d}" ${u} style="--bg:${typeBg(c.etype)}"><div class="in">
     <div class="nm"><span>${c.name}</span></div><div class="eorb">${eIco(c.etype)}</div><div class="kd">에너지</div></div></div>`;
   const k=KTAG[c.kind];
+  if(c.img) return `<div class="hc real trr${d}" ${u} style="--tag:${k[2]}"><div class="rcrop trc" style="background-image:url(${CARDIMG(c.img)})"></div><div class="kd tag">${k[1]}</div></div>`;
   return `<div class="hc tr${d}" ${u} style="--tag:${k[2]};--tagl:${k[3]}"><div class="in">
     <div class="nm"><span>${c.name}</span></div><div class="art" style="background:radial-gradient(circle,#fff,${k[3]})">${c.icon}</div><div class="kd tag">${k[1]}</div></div></div>`;
 }
@@ -735,6 +749,7 @@ function canUse(si,c){
     case 'misty': return mons(s).some(m=>m.c.type==='W');
     case 'rocket': return !!o.active&&o.bench.length>0;
     case 'gary': case 'xattack': return true;
+    case 'mallow': return s.hand.filter(x=>x!==c).length>=2&&s.deck.length>0;
     case 'switch': return !!s.active&&s.bench.length>0;
     case 'pokeball': return s.deck.some(isBasic);
     case 'candy': return candyTargets(s).length>0;
@@ -778,6 +793,44 @@ async function pickCard(si,cards,msg){
     [...cards.map(c=>({v:c,label:c.name})),{v:null,label:'취소',cls:'gray'}]);
 }
 
+// 카드 여러 장 고르기 (같은 카드는 묶어서 보여 줌). n장 다 고르면 확인
+async function pickCards(si,cards,n,msg,score,cancel=true){
+  n=Math.min(n,cards.length); if(n<=0) return [];
+  if(G.p[si].isAI) return cards.slice().sort((a,b)=>score(b)-score(a)).slice(0,n);
+  const groups=[]; for(const c of cards){ const g=groups.find(x=>x.id===c.id); if(g) g.list.push(c); else groups.push({id:c.id,list:[c]}); }
+  return new Promise(res=>{
+    const picked=[]; const m=$('#modal');
+    const draw=()=>{
+      m.innerHTML=`<div class="mbox"><div class="mtext">${msg}<br><b>${picked.length} / ${n}</b></div>
+        <div class="pick-grid">${groups.map((g,i)=>{ const k=picked.filter(c=>c.id===g.id).length;
+          return `<div class="pk${k?' on':''}" data-g="${i}">${handCardHTML(g.list[0])}${g.list.length>1?`<span class="pn">×${g.list.length}</span>`:''}${k?`<span class="pc2">${k}</span>`:''}</div>`; }).join('')}</div>
+        <div class="mbtns"><button class="btn" data-a="ok" ${picked.length<n?'disabled':''}>확인</button>
+        <button class="btn gray" data-a="reset">다시 고르기</button>${cancel?'<button class="btn gray" data-a="no">취소</button>':''}</div></div>`;
+    };
+    draw(); m.classList.add('on');
+    m.onclick=e=>{
+      const pk=e.target.closest('.pk'), b=e.target.closest('button[data-a]');
+      if(pk){ const g=groups[+pk.dataset.g], left=g.list.filter(c=>!picked.includes(c)); if(left.length&&picked.length<n) picked.push(left[0]); else if(!left.length||picked.length>=n){ const i=picked.findIndex(c=>c.id===g.id); if(i>=0) picked.splice(i,1); } draw(); return; }
+      if(!b||b.disabled) return;
+      if(b.dataset.a==='reset'){ picked.length=0; draw(); return; }
+      m.classList.remove('on'); m.onclick=null; res(b.dataset.a==='ok'?picked.slice():null);
+    };
+  });
+}
+function cardValue(s,c){ // 컴퓨터가 카드를 얼마나 아끼는지 (높을수록 중요)
+  if(c.kind==='poke'){ if(c.stage>0) return mons(s).some(m=>m.c.name===c.from)?9:4; return s.bench.length<BENCH_MAX?6:2; }
+  if(c.kind==='energy') return s.hand.filter(x=>x.kind==='energy').length>1?1:5;
+  if(c.kind==='trap') return 3;
+  return 4;
+}
+function searchValue(s,c){ // 컴퓨터가 덱에서 뭘 가져올지
+  if(c.kind==='poke'&&c.stage>0&&mons(s).some(m=>m.c.name===c.from&&canEvoTarget(m))) return 20+c.hp/10;
+  if(c.id==='candy'&&mons(s).some(m=>m.c.stage===0&&s.deck.some(x=>isStage2For(x,m)))) return 15;
+  if(isBasic(c)&&s.bench.length<BENCH_MAX) return 10+c.hp/20;
+  if(c.kind==='energy'&&s.etypes.includes(c.etype)) return 6;
+  return cardValue(s,c);
+}
+
 async function useCard(si,c){
   const s=G.p[si], o=G.p[1-si];
   if(!canUse(si,c)) return false;
@@ -787,12 +840,14 @@ async function useCard(si,c){
     case 'misty': tgt=await pickMon(si,mons(s).filter(m=>m.c.type==='W'),'💧에너지를 붙일 포켓몬을 골라',m=>energyScore(s,m,'W')); if(!tgt) return false; break;
     case 'rocket': tgt=await pickMon(si,o.bench,'상대 배틀 자리로 끌어낼 포켓몬을 골라',m=>-(m.c.hp-m.dmg)); if(!tgt) return false; break;
     case 'switch': tgt=await pickMon(si,s.bench,'배틀 자리로 나갈 포켓몬을 골라',m=>readyScore(m)); if(!tgt) return false; break;
+    case 'mallow': tgt=await pickCards(si,s.hand.filter(x=>x!==c),2,'🍲 마오: 버릴 카드 2장을 골라',x=>-cardValue(s,x)); if(!tgt) return false; break;
     case 'candy': {
       tgt=await pickMon(si,candyTargets(s),'진화시킬 기본 포켓몬을 골라',m=>(m===s.active?10:0)+m.dmg); if(!tgt) return false;
       tgt2=await pickCard(si,s.hand.filter(x=>isStage2For(x,tgt)),'어떤 포켓몬으로 진화할까?'); if(!tgt2) return false; break; }
   }
   s.hand.splice(s.hand.indexOf(c),1); s.discard.push(c);
   if(c.kind==='trainer') s.trUsed=true;
+  if(c.id==='mallow'){ for(const x of tgt){ s.hand.splice(s.hand.indexOf(x),1); s.discard.push(x); } log(`${s.name}: 패 2장을 버렸다 (${tgt.map(x=>x.name).join(', ')})`); }
   log(`${s.name}: ${c.icon} ${c.name} 사용!`); render(); await wait(350);
   const mod={}; await trapPhase(1-si,'card',mod,{card:c});
   if(mod.cancel){ log(`${jo(c.name,'이','가')} 무효가 됐다!`); render(); return true; }
@@ -804,6 +859,9 @@ async function useCard(si,c){
     case 'misty': tgt.energy.push({t:'W'},{t:'W'}); break;
     case 'rocket': { const i=o.bench.indexOf(tgt); o.active.status=null; o.bench[i]=o.active; o.active=tgt; log(`${jo(tgt.c.name,'이','가')} 끌려 나왔다!`); break; }
     case 'gary': s.bonus+=30; break;
+    case 'mallow': { const got=await pickCards(si,s.deck.slice(),2,'🍲 마오: 덱에서 가져올 카드 2장을 골라',x=>searchValue(s,x),false);
+      for(const x of got){ s.deck.splice(s.deck.indexOf(x),1); s.hand.push(x); } shuffle(s.deck);
+      log(`${s.name}: 덱에서 ${got.length}장을 가져왔다`); break; }
     case 'xattack': s.bonus+=20; break;
     case 'switch': { const i=s.bench.indexOf(tgt); s.active.status=null; s.bench[i]=s.active; s.active=tgt; break; }
     case 'pokeball': { const b=s.deck.filter(isBasic); const pk=b[Math.random()*b.length|0]; s.deck.splice(s.deck.indexOf(pk),1); s.hand.push(pk); shuffle(s.deck); log(`${jo(pk.name,'을','를')} 찾았다!`); break; }
@@ -968,6 +1026,7 @@ function aiPickTrainer(si){
     const m=s.active, ok=o.bench.some(b=>m.c.atks.some(a=>canPay([...m.energy,{t:s.curE||'C'}],a.cost)&&calcDmg(s,m,a,b,false)>=b.c.hp-b.dmg));
     if(ok) return has('rocket');
   }
+  if(has('mallow')&&s.hand.length>=4&&s.deck.some(x=>searchValue(s,x)>=15)) return has('mallow');
   if(has('oak')&&s.hand.length<=3) return has('oak');
   if(has('ash')&&s.hand.length<=8) return has('ash');
   return null;
