@@ -43,31 +43,12 @@ button{font:inherit;color:inherit;border:0;cursor:pointer;background:none}
 .pts{color:var(--gold);font-size:14px;font-weight:800}
 .gxm{font-size:10px;font-weight:900;background:linear-gradient(90deg,#ffd54f,#ff7043);color:#3a1500;border-radius:5px;padding:1px 4px}
 .gxm.used{background:#555;color:#999;text-decoration:line-through}
-.abil{padding:6px 10px;border-top:1px solid #eee;background:#fde7e9;font-size:12px;color:#444}
-.abil b{color:#c62828;font-size:14px}
-.atk.gxa{background:linear-gradient(90deg,#fff3c4,#ffe0cc)}
 .brow{display:flex;gap:5px;justify-content:center;padding:4px 0}
 .slot{width:64px;height:84px;border:2px dashed rgba(255,255,255,.15);border-radius:10px}
 .slot.big{width:100px;height:130px}
-.mon{position:relative;width:64px;height:84px;border-radius:10px;background:#fff;color:#222;border:3px solid var(--tc);overflow:hidden;display:flex;flex-direction:column;cursor:pointer}
-.mon.big{width:100px;height:130px}
-.mon img{width:100%;flex:1;object-fit:contain;min-height:0;background:linear-gradient(#fff,var(--tcl))}
-.mon .nm{font-size:10px;font-weight:800;text-align:center;white-space:nowrap;overflow:hidden;padding:0 2px}
-.mon.big .nm{font-size:12px}
-.mon .hpb{height:5px;background:#ddd}
-.mon .hpb i{display:block;height:100%}
-.mon .hpt{position:absolute;top:2px;right:2px;font-size:11px;font-weight:900;background:rgba(255,255,255,.9);border-radius:6px;padding:0 3px}
-.mon .tag{position:absolute;top:18px;right:2px;font-size:10px;font-weight:900;background:#222;color:var(--gold);border-radius:5px;padding:0 3px}
-.mon .ens{position:absolute;left:2px;top:2px;display:flex;flex-wrap:wrap;gap:1px;max-width:62%}
-.mon .st{position:absolute;bottom:22px;left:2px;font-size:10px;background:#222;color:#fff;border-radius:6px;padding:0 4px}
-.mon .sh{position:absolute;bottom:22px;right:2px;font-size:10px;background:#1565c0;color:#fff;border-radius:6px;padding:0 3px}
-.mon.pick{box-shadow:0 0 0 3px #ffeb3b,0 0 18px #ffeb3b;animation:pulse .7s infinite alternate}
-.mon.hit{animation:shake .4s}
 .dpop{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:24px;font-weight:900;color:#e53935;text-shadow:0 0 4px #fff,0 0 4px #fff;pointer-events:none}
 @keyframes pulse{to{box-shadow:0 0 0 3px #fff59d,0 0 6px #fff59d}}
 @keyframes shake{25%{transform:translateX(-5px)}50%{transform:translateX(5px)}75%{transform:translateX(-3px)}}
-.eico{width:15px;height:15px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:9px;background:var(--ec);border:1px solid rgba(0,0,0,.35);flex:0 0 auto}
-.eico.lg{width:22px;height:22px;font-size:13px}
 .mid{display:flex;align-items:center;gap:8px;padding:4px 10px;min-height:52px}
 #log{flex:1;font-size:12px;line-height:1.35;color:#e8fff4;text-shadow:0 1px 2px #000;overflow:hidden;max-height:48px}
 #log div:last-child{font-weight:800;color:#fff}
@@ -77,12 +58,6 @@ button{font:inherit;color:inherit;border:0;cursor:pointer;background:none}
 #endBtn{padding:10px 12px;font-size:14px}
 .bspacer{flex:1}
 #hand{display:flex;gap:6px;overflow-x:auto;padding:8px;background:rgba(0,0,0,.4);min-height:110px;align-items:center}
-.hc{flex:0 0 64px;height:92px;border-radius:9px;background:#fff;color:#222;border:3px solid var(--tc);display:flex;flex-direction:column;overflow:hidden;position:relative;cursor:pointer}
-.hc img{flex:1;min-height:0;object-fit:contain;width:100%;background:var(--tcl)}
-.hc .ic{flex:1;display:flex;align-items:center;justify-content:center;font-size:28px;background:var(--tcl)}
-.hc .nm{font-size:10px;font-weight:800;text-align:center;padding:1px 2px;white-space:nowrap;overflow:hidden}
-.hc .kd{position:absolute;top:1px;left:1px;font-size:8px;font-weight:900;color:#fff;background:var(--tc);border-radius:4px;padding:0 3px}
-.hc.dim{opacity:.55}
 #prompt{position:absolute;left:8px;right:8px;top:42%;background:rgba(10,20,40,.92);border:2px solid #ffeb3b;border-radius:12px;padding:10px;display:none;align-items:center;gap:8px;z-index:20;font-weight:800;font-size:14px}
 #prompt.on{display:flex}
 #prompt span{flex:1}
@@ -101,19 +76,6 @@ button{font:inherit;color:inherit;border:0;cursor:pointer;background:none}
 .mbox{display:flex;flex-direction:column;align-items:center;gap:10px;max-height:100%;overflow-y:auto;width:100%}
 .mbtns{display:flex;flex-direction:column;gap:6px;width:260px}
 .mtext{background:var(--panel);border-radius:14px;padding:16px;text-align:center;font-size:16px;line-height:1.5;width:280px}
-.bigcard{width:260px;border-radius:16px;background:#fff;color:#222;border:6px solid var(--tc);overflow:hidden;flex:0 0 auto}
-.bigcard .hd{display:flex;justify-content:space-between;align-items:center;padding:6px 10px;background:var(--tcl);font-weight:900;font-size:16px}
-.bigcard .hd small{font-size:11px;color:#555;font-weight:700;display:block}
-.bigcard .art{height:140px;display:flex;align-items:center;justify-content:center;background:linear-gradient(#fff,var(--tcl));font-size:70px}
-.bigcard .art img{height:132px}
-.atk{padding:6px 10px;border-top:1px solid #eee}
-.atk .row{display:flex;align-items:center;gap:3px;font-weight:800;font-size:15px}
-.atk .row .dm{margin-left:auto;font-size:18px}
-.atk .tx{font-size:12px;color:#555;margin-top:2px}
-.bigcard .txt{padding:10px;font-size:14px;line-height:1.5}
-.bigcard .ft{font-size:11px;color:#555;padding:6px 10px;display:flex;justify-content:space-between;border-top:1px solid #eee;align-items:center}
-.bigcard .now{font-size:12px;padding:6px 10px;background:#f6f6f6;border-top:1px solid #eee;display:flex;gap:4px;align-items:center;flex-wrap:wrap}
-.rar{color:#b8860b;font-size:11px}
 
 /* 덱 편집 */
 .dsum{display:flex;flex-wrap:wrap;gap:4px 10px;padding:8px 12px;font-size:12px;background:#18203a;border-bottom:1px solid var(--line)}
@@ -127,7 +89,8 @@ button{font:inherit;color:inherit;border:0;cursor:pointer;background:none}
 .tab.on{background:var(--accent);color:#0b1630;font-weight:800}
 .crow{display:flex;align-items:center;gap:8px;padding:6px;border-bottom:1px solid var(--line)}
 .crow .hc{flex:0 0 48px;height:66px}
-.crow .hc .ic{font-size:20px}
+.crow .hc .art{font-size:18px}
+.crow .hc .kd{display:none}
 .crow .hc .nm{display:none}
 .crow .inf{flex:1;min-width:0}
 .crow .inf b{font-size:14px}
@@ -145,9 +108,10 @@ button{font:inherit;color:inherit;border:0;cursor:pointer;background:none}
 .pcard{width:88px;height:124px;position:relative;cursor:pointer}
 .pcard .back{position:absolute;inset:0;border-radius:10px;background:linear-gradient(135deg,#3b4cca,#1a237e);border:3px solid #fff;display:flex;align-items:center;justify-content:center;font-size:34px}
 .pcard .hc{position:absolute;inset:0;width:88px;height:124px}
-.pcard .hc .nm{font-size:11px}
+.pcard .hc .nm{font-size:10px}
+.pcard .hc .art{font-size:36px}
 .pcard .new{position:absolute;top:-6px;right:-6px;background:#e53935;color:#fff;font-size:10px;font-weight:900;border-radius:8px;padding:1px 5px;z-index:2}
-.pcard .r{position:absolute;bottom:18px;left:0;right:0;text-align:center;font-size:10px;color:#b8860b;font-weight:900;z-index:2}
+.pcard .r{position:absolute;bottom:-16px;left:0;right:0;text-align:center;font-size:10px;color:#b8860b;font-weight:900;z-index:2}
 
 /* 미션 */
 .mis{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:10px 12px;margin-bottom:8px;display:flex;align-items:center;gap:10px}
@@ -156,6 +120,103 @@ button{font:inherit;color:inherit;border:0;cursor:pointer;background:none}
 .mis .bar i{display:block;height:100%;background:var(--accent)}
 .mis .sub{font-size:12px;color:var(--sub)}
 .mis.done{opacity:.45}
+/* ===== 썬문 시절 카드 디자인 ===== */
+.eico{width:15px;height:15px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:9px;line-height:1;background:radial-gradient(circle at 35% 30%,rgba(255,255,255,.8) 0,rgba(255,255,255,0) 48%),var(--ec);border:1px solid rgba(0,0,0,.45);box-shadow:0 1px 1px rgba(0,0,0,.35);flex:0 0 auto;text-shadow:none}
+.eico.lg{width:22px;height:22px;font-size:13px}
+.rar{color:#b8860b;font-size:11px}
+/* 큰 카드 */
+.pc{position:relative;width:272px;border-radius:14px;background:linear-gradient(160deg,#ffe26a,#f2c51d 50%,#f9d846);padding:9px;box-shadow:0 8px 22px rgba(0,0,0,.55);flex:0 0 auto;color:#151515;text-align:left}
+.pc.gx{background:linear-gradient(135deg,#f3f5f6,#aeb8be 35%,#ffffff 52%,#98a3aa 75%,#e8ecee)}
+.pc>.in{position:relative;border-radius:6px;background:var(--bg);padding:6px 8px 4px;overflow:hidden;min-height:372px;display:flex;flex-direction:column;box-shadow:inset 0 0 0 1px rgba(0,0,0,.25)}
+.pc.gx>.in{background:var(--bg)}
+.gxart{position:absolute;inset:0;background-size:165%;background-position:50% 16%;background-repeat:no-repeat}
+.gxart::after{content:'';position:absolute;inset:0;background:linear-gradient(180deg,rgba(0,0,0,.25) 0%,rgba(0,0,0,0) 22%,rgba(0,0,0,.1) 42%,rgba(0,0,0,.72) 62%,rgba(0,0,0,.85) 100%)}
+.pc.gx .pc-top,.pc.gx .pc-body,.pc.gx .pc-evo,.pc.dark .pc-top,.pc.dark .pc-body,.pc.dark .pc-evo,.pc.dark .tc-name{color:#fff;text-shadow:0 1px 2px #000,0 0 3px #000}
+.pc-top,.pc-evo,.pc-body,.pc-wrr,.pc-foot,.pc-now,.pc-rule{position:relative}
+.pc-top{display:flex;align-items:center;gap:5px}
+.stg{font-size:9px;font-weight:900;font-style:italic;background:linear-gradient(#ffffff,#b9c0c5);color:#333;border-radius:3px 10px 10px 3px;padding:1px 8px 1px 4px;box-shadow:0 1px 1px rgba(0,0,0,.45);text-shadow:none;white-space:nowrap}
+.pn{font-size:19px;font-weight:900;flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;letter-spacing:-.5px}
+.php{font-weight:900;font-size:21px;display:flex;align-items:center;gap:3px;white-space:nowrap}
+.php small{font-size:9px;margin-right:-1px}
+.gxlogo{font-style:italic;font-weight:900;background:linear-gradient(180deg,#ffffff 0%,#a8dcff 45%,#1f63d1 56%,#c8ecff 100%);-webkit-background-clip:text;background-clip:text;color:transparent;-webkit-text-stroke:.7px #0a2560;filter:drop-shadow(0 0 1.5px rgba(255,255,255,.9));margin-left:2px;text-shadow:none;letter-spacing:-1px;padding-right:2px}
+.pc-evo{display:flex;align-items:center;gap:4px;font-size:9px;font-style:italic;margin:2px 0 0}
+.pc-evo img{width:24px;height:24px;border-radius:50%;background:#fff;border:2px solid #c3c9cd;object-fit:contain;box-shadow:0 1px 2px rgba(0,0,0,.4)}
+.pc-art{margin-top:4px;height:132px;border:4px solid;border-image:linear-gradient(135deg,#fafafa,#a3abb1,#ffffff,#8a949b) 1;background:radial-gradient(circle at 50% 62%,rgba(255,255,255,.95),rgba(255,255,255,.35) 75%);display:flex;align-items:center;justify-content:center;box-shadow:0 2px 4px rgba(0,0,0,.45);font-size:66px;overflow:hidden}
+.pc-art img{height:126px;filter:drop-shadow(0 3px 3px rgba(0,0,0,.35))}
+.pc-info{margin:0 12px;background:linear-gradient(#fafafa,#c5cbcf);font-size:8.5px;font-style:italic;text-align:center;padding:1px 0;border-radius:0 0 5px 5px;color:#333;box-shadow:0 1px 2px rgba(0,0,0,.3)}
+.gxspace{height:126px}
+.pc-body{flex:1;display:flex;flex-direction:column;justify-content:center;gap:1px;padding:6px 0 4px}
+.pa{display:grid;grid-template-columns:auto 1fr auto;align-items:center;column-gap:6px;padding:4px 2px}
+.pa+.pa{border-top:1px solid rgba(0,0,0,.14)}
+.pc.gx .pa+.pa,.pc.dark .pa+.pa{border-top-color:rgba(255,255,255,.22)}
+.pc-cost{display:flex;gap:1px;min-width:47px}
+.pa-n{font-weight:900;font-size:15px;text-align:center}
+.pa-d{font-weight:900;font-size:20px;min-width:32px;text-align:right}
+.pa-t{grid-column:1/-1;font-size:10.5px;line-height:1.35;padding:1px 2px 0}
+.pa.gxa{background:linear-gradient(90deg,rgba(8,32,96,.95),rgba(38,92,200,.85));border-radius:6px;color:#fff;text-shadow:0 1px 2px #000;margin-top:4px;border:1px solid rgba(255,255,255,.6)}
+.pa.gxa+.pa{border-top:0}
+.pab{padding:4px 2px}
+.abtag{display:inline-block;background:linear-gradient(#ff6a5c,#c3121b);color:#fff;font-size:10px;font-weight:900;font-style:italic;padding:1px 9px 1px 5px;border-radius:3px 10px 10px 3px;margin-right:5px;text-shadow:none;box-shadow:0 1px 1px rgba(0,0,0,.4)}
+.pab b{font-size:15px;color:#b3141c}
+.pc.gx .pab b,.pc.dark .pab b{color:#ff9e94}
+.pc-now{font-size:11px;background:rgba(255,255,255,.9);border-radius:6px;padding:3px 6px;display:flex;gap:3px;align-items:center;flex-wrap:wrap;color:#222;margin-bottom:3px}
+.pc-wrr{display:grid;grid-template-columns:1.1fr 1fr 1fr;background:linear-gradient(#ffffff,#dde2e5);border-radius:10px;font-size:9px;color:#333;padding:2px 7px;align-items:center;gap:4px;box-shadow:inset 0 0 0 1px rgba(0,0,0,.18)}
+.pc-wrr span{display:flex;align-items:center;gap:2px;white-space:nowrap}
+.pc-rule{margin-top:3px;font-size:9px;background:linear-gradient(90deg,#163785,#2f6fd6);color:#fff;border-radius:6px;padding:2px 7px}
+.pc-foot{display:flex;justify-content:space-between;font-size:8px;font-style:italic;color:rgba(0,0,0,.7);padding:3px 2px 0}
+.pc.gx .pc-foot,.pc.dark .pc-foot{color:rgba(255,255,255,.85)}
+/* 트레이너 · 마법 · 함정 */
+.pc.tr>.in{background:repeating-linear-gradient(90deg,rgba(255,255,255,.35) 0 1px,rgba(0,0,0,.03) 1px 3px),linear-gradient(#f6f8f9,#c5ccd1)}
+.tc-hd{display:flex;justify-content:space-between;align-items:center;background:linear-gradient(90deg,#ffffff,#dfe4e7);margin:-6px -8px 4px;padding:3px 8px;border-bottom:2px solid #98a2a8}
+.tc-hd i{font-weight:900;font-size:15px;color:#4a4a4a;letter-spacing:1px}
+.tc-tag{background:var(--tag);color:#fff;font-weight:900;font-size:11px;padding:1px 10px;border-radius:3px;font-style:italic}
+.tc-name{font-size:19px;font-weight:900;margin-bottom:4px}
+.tc-art{height:124px;border:4px solid;border-image:linear-gradient(135deg,#fafafa,#a3abb1,#ffffff,#8a949b) 1;background:radial-gradient(circle,#ffffff 0%,var(--tagl) 100%);display:flex;align-items:center;justify-content:center;font-size:68px;box-shadow:0 2px 4px rgba(0,0,0,.4)}
+.tc-txt{flex:1;font-size:13.5px;line-height:1.55;padding:12px 4px;font-weight:600;color:#222}
+.tc-rule{background:var(--tag);color:#fff;font-size:10px;border-radius:4px;padding:3px 7px;margin-left:44px;line-height:1.35}
+/* 에너지 카드 */
+.ec-hd{font-size:12px;font-weight:900;font-style:italic;color:#fff;text-shadow:0 1px 2px rgba(0,0,0,.6)}
+.ec-orb{flex:1;display:flex;align-items:center;justify-content:center}
+.ec-orb .eico{width:140px;height:140px;font-size:76px;border-width:4px;box-shadow:0 4px 10px rgba(0,0,0,.45)}
+.ec-name{text-align:center;font-weight:900;font-size:19px;color:#fff;text-shadow:0 1px 3px rgba(0,0,0,.7)}
+.ec-txt{font-size:11px;text-align:center;color:#fff;text-shadow:0 1px 2px rgba(0,0,0,.7);padding:4px 0}
+/* 작은 카드 (손패 · 덱 · 팩) */
+.hc{flex:0 0 64px;height:92px;border-radius:7px;background:linear-gradient(160deg,#ffe26a,#f2c51d 50%,#f9d846);padding:3px;position:relative;cursor:pointer;box-shadow:0 2px 4px rgba(0,0,0,.45);color:#111}
+.hc.gx{background:linear-gradient(135deg,#f3f5f6,#aeb8be 35%,#ffffff 52%,#98a3aa 75%,#e8ecee)}
+.hc>.in{height:100%;border-radius:3px;background:var(--bg);display:flex;flex-direction:column;overflow:hidden}
+.hc.tr>.in{background:linear-gradient(#f6f8f9,#c5ccd1)}
+.hc.dark{color:#fff}
+.hc .nm{font-size:8.5px;font-weight:900;padding:1px 2px;white-space:nowrap;overflow:hidden;display:flex;justify-content:space-between;gap:2px}
+.hc .nm span{overflow:hidden;text-overflow:ellipsis}
+.hc .art{flex:1;min-height:0;margin:0 2px;border:2px solid #d3d8db;background:rgba(255,255,255,.6);display:flex;align-items:center;justify-content:center;font-size:26px;overflow:hidden}
+.hc .art img{width:100%;height:100%;object-fit:contain}
+.hc .kd{font-size:7.5px;font-weight:900;text-align:center;padding:1px 0;white-space:nowrap;overflow:hidden}
+.hc .kd.tag{color:#fff;background:var(--tag);margin:1px 3px 2px;border-radius:2px}
+.hc .eorb{flex:1;display:flex;align-items:center;justify-content:center}
+.hc .eorb .eico{width:36px;height:36px;font-size:20px}
+.hc.dim{opacity:.55}
+/* 필드 위 포켓몬 */
+.mon{position:relative;width:64px;height:84px;border-radius:7px;background:linear-gradient(160deg,#ffe26a,#f2c51d 50%,#f9d846);padding:3px;cursor:pointer;box-shadow:0 2px 5px rgba(0,0,0,.5);color:#111}
+.mon.big{width:100px;height:130px;padding:4px}
+.mon.gx{background:linear-gradient(135deg,#f3f5f6,#aeb8be 35%,#ffffff 52%,#98a3aa 75%,#e8ecee)}
+.mon.dark{color:#fff}
+.mon>.in{position:relative;height:100%;border-radius:3px;background:var(--bg);display:flex;flex-direction:column;overflow:hidden}
+.mon .mtop{display:flex;justify-content:space-between;align-items:baseline;font-weight:900;font-size:8.5px;padding:0 2px;white-space:nowrap;gap:2px}
+.mon .mtop .nm{overflow:hidden;text-overflow:ellipsis}
+.mon .mtop .hp{font-size:11px}
+.mon.big .mtop{font-size:11px}
+.mon.big .mtop .hp{font-size:15px}
+.mon .art{flex:1;min-height:0;margin:0 2px;border:2px solid #d3d8db;background:rgba(255,255,255,.55);display:flex;align-items:center;justify-content:center;overflow:hidden}
+.mon .art img{width:100%;height:100%;object-fit:contain}
+.mon .hpb{height:5px;background:rgba(0,0,0,.28);margin:2px 2px 3px;border-radius:3px;overflow:hidden}
+.mon .hpb i{display:block;height:100%}
+.mon .tag{position:absolute;bottom:11px;right:3px;font-size:9px;font-weight:900;font-style:italic;background:linear-gradient(#2a6fd8,#0b2a66);color:#fff;border-radius:4px;padding:0 3px}
+.mon .ens{position:absolute;left:3px;top:13px;display:flex;flex-wrap:wrap;gap:1px;max-width:70%}
+.mon.big .ens{top:17px}
+.mon .st{position:absolute;bottom:11px;left:3px;font-size:9px;background:#222;color:#fff;border-radius:6px;padding:0 4px}
+.mon .sh{position:absolute;top:13px;right:3px;font-size:9px;background:#1565c0;color:#fff;border-radius:6px;padding:0 3px}
+.mon.pick{box-shadow:0 0 0 3px #ffeb3b,0 0 18px #ffeb3b;animation:pulse .7s infinite alternate}
+.mon.hit{animation:shake .4s}
 </style>
 </head>
 <body>
@@ -243,7 +304,6 @@ const T={G:{n:'풀',e:'🌿',c:'#43a047',l:'#dcf3d6'},R:{n:'불꽃',e:'🔥',c:'
 const ETYPES='GRWLPFDM';
 const WEAK={G:'R',R:'W',W:'L',L:'F',P:'D',F:'P',D:'G',M:'R',C:'F'};
 const KIND={poke:'포켓몬',energy:'에너지',trainer:'트레이너',magic:'마법',trap:'함정'};
-const KC={trainer:{c:'#f57c00',l:'#ffe8cc'},magic:{c:'#00897b',l:'#d0f2ee'},trap:{c:'#c2185b',l:'#fbd6e5'}};
 const STAGE=['기본','1진화','2진화'];
 const ST={poison:'☠️독',burn:'🔥화상',sleep:'💤잠듦',para:'⚡마비'};
 const ART=n=>'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/'+n+'.png';
@@ -426,7 +486,6 @@ const isBasic=c=>c.kind==='poke'&&c.stage===0;
 const rarTxt=r=>r>=4?'★':r>0?'◆'.repeat(r):'';
 const eIco=(t,lg)=>`<span class="eico${lg?' lg':''}" style="--ec:${T[t].c}">${T[t].e}</span>`;
 const costHTML=cost=>[...cost].map(t=>eIco(t)).join('');
-function colorOf(c){ if(c.kind==='poke') return T[c.type]; if(c.kind==='energy') return T[c.etype]; return KC[c.kind]; }
 function show(id){ document.querySelectorAll('.screen').forEach(s=>s.classList.toggle('on',s.id===id)); }
 
 function effText(e){ if(!e) return ''; const o=[];
@@ -445,32 +504,54 @@ function effText(e){ if(!e) return ''; const o=[];
   if(e.shield) o.push(`다음 상대 턴에 받는 데미지 -${e.shield}`);
   return o.join(' · ');
 }
+// ----- 썬문 시절 카드 디자인 -----
+const TB={G:['#e3f7c2','#4f9e36'],R:['#ffd29c','#e04a17'],W:['#cdeeff','#2a7fd0'],L:['#fff8bf','#ecb90a'],P:['#f1d9f7','#9446b3'],
+  F:['#f6dcbc','#ab5f33'],D:['#8aa3a2','#1b343a'],M:['#ffffff','#8e9ca4'],C:['#ffffff','#c7cbce']};
+const typeBg=t=>`radial-gradient(ellipse at 50% 30%,${TB[t][0]} 0%,${TB[t][1]} 95%)`;
+const KTAG={trainer:['TRAINER','트레이너','#ee7d12','#ffe2c2','트레이너 카드는 내 턴에 1장만 쓸 수 있다.'],
+  magic:['MAGIC','마법','#2a78db','#d6e8ff','마법 카드는 한 턴에 여러 장 쓸 수 있다.'],
+  trap:['TRAP','함정','#c2185b','#fbd6e5','상대 턴에 조건이 되면 패에서 발동한다. 상대 턴마다 1장.']};
+let CNUM=null;
+function cardNo(c){ if(!CNUM){ CNUM={}; let i=0; for(const x of CARDS) if(x.kind!=='energy') CNUM[x.id]=++i; CNUM.total=i; } return CNUM[c.id]?`${CNUM[c.id]}/${CNUM.total}`:''; }
+const gxName=n=>n.endsWith('GX')?`${n.slice(0,-2)}<i class="gxlogo">GX</i>`:n;
+const footHTML=c=>`<div class="pc-foot"><span>Illus. 구예준 스튜디오</span><span>${cardNo(c)} <span class="rar">${rarTxt(c.rar)}</span></span></div>`;
 function bigCardHTML(c,m){
-  const col=colorOf(c);
   if(c.kind==='poke'){
-    const tag=(c.gx?' · GX':'')+(c.legend?' ★전설':'');
-    return `<div class="bigcard" style="--tc:${col.c};--tcl:${col.l}">
-      <div class="hd"><div><small>${STAGE[c.stage]}${c.from?' · '+c.from+'에서 진화':''}${tag}</small>${c.name}</div><div>HP ${c.hp} ${eIco(c.type,1)}</div></div>
-      <div class="art"><img src="${ART(c.dex)}" onerror="this.replaceWith('${T[c.type].e}')"></div>
-      ${c.abil?`<div class="abil"><b>특성 ✨ ${c.abil.name}</b><div>${c.abil.txt}</div></div>`:''}
-      ${c.atks.map(a=>`<div class="atk${a.gx?' gxa':''}"><div class="row">${costHTML(a.cost)} <span>${a.name}</span><span class="dm">${a.dmg||''}</span></div>${a.eff||a.gx?`<div class="tx">${a.gx?'GX 기술: 한 판에 1번만 (내 GX 포켓몬 통틀어)'+(a.eff?' · ':''):''}${effText(a.eff)}</div>`:''}</div>`).join('')}
-      ${m?`<div class="now">남은 HP <b>${c.hp-m.dmg}</b> · 붙은 에너지 ${m.energy.map(e=>eIco(e.t)).join('')||'없음'}${m.status?' · '+ST[m.status]:''}</div>`:''}
-      <div class="ft"><span>약점 ${eIco(c.weak)} +${WEAK_BONUS}</span><span>후퇴 ${c.ret?costHTML('C'.repeat(c.ret)):'없음'}</span><span class="rar">${rarTxt(c.rar)}</span></div>
-      ${c.gx?'<div class="ft"><span>GX 포켓몬이 기절하면 상대가 사이드를 2장 가져간다</span></div>':''}
-    </div>`;
+    const prev=c.from?BYNAME[c.from]:null, dark=c.type==='D';
+    const atks=c.atks.map(a=>{
+      const tx=(a.gx?'GX 기술은 한 판에 1번만 쓸 수 있다.'+(a.eff?' ':''):'')+effText(a.eff);
+      return `<div class="pa${a.gx?' gxa':''}"><span class="pc-cost">${costHTML(a.cost)}</span><span class="pa-n">${gxName(a.name)}</span><span class="pa-d">${a.dmg||''}</span>${tx?`<div class="pa-t">${tx}</div>`:''}</div>`;}).join('');
+    return `<div class="pc${c.gx?' gx':''}${dark?' dark':''}" style="--bg:${typeBg(c.type)}"><div class="in">
+      ${c.gx?`<div class="gxart" style="background-image:url(${ART(c.dex)})"></div>`:''}
+      <div class="pc-top"><span class="stg">${STAGE[c.stage]}</span><span class="pn">${gxName(c.name)}</span><span class="php"><small>HP</small>${c.hp}${eIco(c.type,1)}</span></div>
+      ${prev?`<div class="pc-evo"><img src="${ART(prev.dex)}" onerror="this.style.visibility='hidden'">${prev.name}에서 진화</div>`:''}
+      ${c.gx?'<div class="gxspace"></div>':`<div class="pc-art"><img src="${ART(c.dex)}" onerror="this.replaceWith('${T[c.type].e}')"></div>
+      <div class="pc-info">No.${String(c.dex).padStart(3,'0')} · ${T[c.type].n} 타입${c.legend?' · ★전설의 포켓몬':''}</div>`}
+      <div class="pc-body">${c.abil?`<div class="pab"><span class="abtag">특성</span><b>${c.abil.name}</b><div class="pa-t">${c.abil.txt}</div></div>`:''}${atks}</div>
+      ${m?`<div class="pc-now">남은 HP <b>${c.hp-m.dmg}</b> · 에너지 ${m.energy.map(e=>eIco(e.t)).join('')||'없음'}${m.status?' · '+ST[m.status]:''}</div>`:''}
+      <div class="pc-wrr"><span>약점 ${eIco(c.weak)} +${WEAK_BONUS}</span><span>저항력</span><span>후퇴 ${c.ret?costHTML('C'.repeat(c.ret)):''}</span></div>
+      ${c.gx?'<div class="pc-rule"><b>GX 룰</b> · GX 포켓몬이 기절하면 상대는 사이드를 2장 가져간다.</div>':''}
+      ${footHTML(c)}</div></div>`;
   }
-  const kind=c.kind==='energy'?'에너지':KIND[c.kind];
-  return `<div class="bigcard" style="--tc:${col.c};--tcl:${col.l}">
-    <div class="hd"><div><small>${kind}</small>${c.name}</div><div class="rar">${rarTxt(c.rar)}</div></div>
-    <div class="art">${c.icon}</div>
-    <div class="txt">${c.txt}${c.kind==='trap'?'<br><small style="color:#888">상대 턴에 조건이 되면 패에서 발동할지 물어봐요. 상대 턴마다 1장.</small>':''}${c.kind==='trainer'?'<br><small style="color:#888">트레이너는 턴에 1장만.</small>':''}</div>
-  </div>`;
+  if(c.kind==='energy') return `<div class="pc" style="--bg:${typeBg(c.etype)}"><div class="in">
+      <div class="ec-hd">기본 에너지</div><div class="ec-orb">${eIco(c.etype,1)}</div><div class="ec-name">${c.name}</div>
+      <div class="ec-txt">포켓몬에게 붙여서 기술에 쓴다. 턴에 1장. (자동 에너지와 따로)</div></div></div>`;
+  const k=KTAG[c.kind];
+  return `<div class="pc tr" style="--tag:${k[2]};--tagl:${k[3]}"><div class="in">
+    <div class="tc-hd"><i>${k[0]}</i><span class="tc-tag">${k[1]}</span></div>
+    <div class="tc-name">${c.name}</div><div class="tc-art">${c.icon}</div>
+    <div class="tc-txt">${c.txt}</div><div class="tc-rule">${k[4]}</div>${footHTML(c)}</div></div>`;
 }
 function handCardHTML(c,dim){
-  const col=colorOf(c);
-  const pic=c.kind==='poke'?`<img src="${ART(c.dex)}" loading="lazy" onerror="this.style.visibility='hidden'">`:`<div class="ic">${c.icon}</div>`;
-  const kd=c.kind==='poke'?(c.stage?STAGE[c.stage]:'기본')+(c.gx?' GX':'')+(c.legend?'★':''):KIND[c.kind];
-  return `<div class="hc${dim?' dim':''}" data-uid="${c.uid||''}" data-id="${c.id}" style="--tc:${col.c};--tcl:${col.l}"><span class="kd">${kd}</span>${pic}<div class="nm">${c.name}</div></div>`;
+  const d=dim?' dim':'', u=`data-uid="${c.uid||''}" data-id="${c.id}"`;
+  if(c.kind==='poke') return `<div class="hc${c.gx?' gx':''}${c.type==='D'?' dark':''}${d}" ${u} style="--bg:${typeBg(c.type)}"><div class="in">
+    <div class="nm"><span>${c.name}</span><b>${c.hp}</b></div><div class="art"><img src="${ART(c.dex)}" loading="lazy" onerror="this.style.visibility='hidden'"></div>
+    <div class="kd">${STAGE[c.stage]}${c.gx?' · GX':''}${c.legend?' ★':''}</div></div></div>`;
+  if(c.kind==='energy') return `<div class="hc${d}" ${u} style="--bg:${typeBg(c.etype)}"><div class="in">
+    <div class="nm"><span>${c.name}</span></div><div class="eorb">${eIco(c.etype)}</div><div class="kd">에너지</div></div></div>`;
+  const k=KTAG[c.kind];
+  return `<div class="hc tr${d}" ${u} style="--tag:${k[2]};--tagl:${k[3]}"><div class="in">
+    <div class="nm"><span>${c.name}</span></div><div class="art" style="background:radial-gradient(circle,#fff,${k[3]})">${c.icon}</div><div class="kd tag">${k[1]}</div></div></div>`;
 }
 
 // 모달: 버튼 누르면 그 값으로 끝남
@@ -909,16 +990,17 @@ async function aiTurn(si){
 
 // ================= 배틀 화면 =================
 function monHTML(m,big){
-  const c=m.c, t=T[c.type], hp=Math.max(0,c.hp-m.dmg), pct=hp/c.hp*100;
+  const c=m.c, hp=Math.max(0,c.hp-m.dmg), pct=hp/c.hp*100;
   const pick=chooser&&chooser.ids.has(m.uid)?' pick':'';
   const hit=Date.now()-m.hitAt<700;
-  return `<div class="mon${big?' big':''}${pick}${hit?' hit':''}" data-uid="${m.uid}" style="--tc:${t.c};--tcl:${t.l}">
-    <img src="${ART(c.dex)}" onerror="this.style.visibility='hidden'">
-    <div class="hpt">${hp}</div>${c.gx||c.legend?`<div class="tag">${c.gx?'GX':''}${c.legend?'★':''}</div>`:''}
+  return `<div class="mon${big?' big':''}${c.gx?' gx':''}${c.type==='D'?' dark':''}${pick}${hit?' hit':''}" data-uid="${m.uid}" style="--bg:${typeBg(c.type)}"><div class="in">
+    <div class="mtop"><span class="nm">${c.name}</span><span class="hp">${hp}</span></div>
+    <div class="art"><img src="${ART(c.dex)}" onerror="this.style.visibility='hidden'"></div>
+    <div class="hpb"><i style="width:${pct}%;background:${pct>50?'#43a047':pct>25?'#fbc02d':'#e53935'}"></i></div>
+    ${c.gx||c.legend?`<div class="tag">${c.gx?'GX':''}${c.legend?'★':''}</div>`:''}
     <div class="ens">${m.energy.map(e=>eIco(e.t)).join('')}</div>
     ${m.status?`<div class="st">${ST[m.status]}</div>`:''}${m.shield?`<div class="sh">🛡${m.shield}</div>`:''}
-    <div class="hpb"><i style="width:${pct}%;background:${pct>50?'#43a047':pct>25?'#fbc02d':'#e53935'}"></i></div>
-    <div class="nm">${c.name}</div>${hit?`<div class="dpop">-${m.hitD}</div>`:''}</div>`;
+    </div>${hit?`<div class="dpop">-${m.hitD}</div>`:''}</div>`;
 }
 const benchHTML=s=>{let h='';for(let i=0;i<BENCH_MAX;i++) h+=s.bench[i]?monHTML(s.bench[i]):'<div class="slot"></div>';return h;};
 const ptsHTML=s=>`<span title="사이드">🎴${s.prizes.length}</span> <span class="gxm${s.gxUsed?' used':''}">GX</span>`;
