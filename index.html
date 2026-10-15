@@ -256,6 +256,23 @@ button{font:inherit;color:inherit;border:0;cursor:pointer;background:none}
 .pk.on{box-shadow:0 0 0 3px #ffeb3b,0 0 12px #ffeb3b}
 .pk .pn{position:absolute;bottom:-4px;left:-4px;background:#333;color:#fff;font-size:10px;border-radius:8px;padding:0 5px}
 .pk .pc2{position:absolute;top:-6px;right:-6px;background:#e53935;color:#fff;font-weight:900;font-size:12px;border-radius:50%;width:20px;height:20px;display:flex;align-items:center;justify-content:center}
+/* 실전 순위 */
+.usub{padding:6px 12px;font-size:12px;color:var(--sub);background:#18203a;border-bottom:1px solid var(--line)}
+.urow{display:flex;align-items:center;gap:8px;padding:6px 4px;border-bottom:1px solid var(--line);cursor:pointer}
+.urow .hc{flex:0 0 48px;height:66px}
+.urow .hc .rmini,.urow .hc .kd,.urow .hc .nm{display:none}
+.urow .hc.real{height:auto;align-self:center}
+.urank{width:28px;text-align:center;font-weight:900;font-size:15px;color:var(--sub)}
+.urank.top3{font-size:20px}
+.uinf{flex:1;min-width:0}
+.uinf b{font-size:14px}
+.usub2{font-size:11px;color:var(--sub)}
+.ubar{height:6px;background:#2a3355;border-radius:3px;margin-top:4px;overflow:hidden}
+.ubar i{display:block;height:100%;background:linear-gradient(90deg,#4fc3f7,#ffd54f)}
+.upct{font-weight:900;font-size:16px;color:var(--gold);min-width:56px;text-align:right}
+.ueorb{width:48px;display:flex;justify-content:center}
+.ueorb .eico{width:36px;height:36px;font-size:20px}
+.uempty{color:var(--sub);text-align:center;padding:30px 10px;line-height:1.6}
 </style>
 </head>
 <body>
@@ -270,6 +287,7 @@ button{font:inherit;color:inherit;border:0;cursor:pointer;background:none}
     <button class="btn gray" onclick="openDeck()">🃏 덱 편집</button>
     <button class="btn gray" onclick="openPack()">🎁 카드팩</button>
     <button class="btn gray" onclick="openMissions()">📜 미션<span class="badge" id="misBadge" style="display:none"></span></button>
+    <button class="btn gray" onclick="openUsage()">📊 실전 순위</button>
   </div>
 </div>
 
@@ -314,6 +332,14 @@ button{font:inherit;color:inherit;border:0;cursor:pointer;background:none}
 <div class="screen" id="pack">
   <div class="top"><button class="btn gray" onclick="goHome()">←</button><h2>카드팩</h2><span class="cr" id="packCr"></span></div>
   <div class="scroll" id="packBody"></div>
+</div>
+
+<!-- 실전 순위 -->
+<div class="screen" id="usage">
+  <div class="top"><button class="btn gray" onclick="goHome()">←</button><h2>실전 순위</h2><button class="btn gray" onclick="openUsage()">↻</button></div>
+  <div class="usub" id="usageSub"></div>
+  <div class="tabs" id="utabs"></div>
+  <div class="scroll" id="usageList"></div>
 </div>
 
 <!-- 미션 -->
@@ -517,6 +543,7 @@ function defSave(){
 }
 const RENAME={charizardex:'charizardgx',pikachuex:'pikachugx',mewtwoex:'mewtwogx'}; // ex → GX 로 바뀐 카드
 function load(){ try{S=JSON.parse(localStorage.getItem(SKEY));}catch(e){S=null} if(!S||!S.col) S=defSave();
+  if(!S.pid){ S.pid=Math.random().toString(36).slice(2,12); save(); }
   for(const box of [S.col,S.deck]) for(const [o,n] of Object.entries(RENAME)) if(box[o]){ box[n]=(box[n]||0)+box[o]; delete box[o]; }
   for(const box of [S.col,S.deck]) for(const id of Object.keys(box)) if(!C[id]) delete box[id]; }
 function save(){ try{localStorage.setItem(SKEY,JSON.stringify(S));}catch(e){} }
@@ -642,6 +669,7 @@ function showOpp(){
 async function pickOpp(i){
   const v=validate(S.deck,S.etypes);
   if(!v.ok){ await alertBox('덱이 아직 규칙에 안 맞아!<br><small>'+v.errs.join('<br>')+'</small>'); return openDeck(); }
+  uploadDeck();
   startBattle(OPPS[i]);
 }
 
@@ -1254,7 +1282,7 @@ function cardInfo(id){ modal(bigCardHTML(C[id]),[{v:1,label:'닫기',cls:'gray'}
 async function saveDeck(){
   const v=validate(D,DE);
   if(!v.ok) return alertBox('아직 저장 못 해!<br><small>'+v.errs.join('<br>')+'</small>');
-  S.deck={...D}; S.etypes=[...DE]; S.st.saved=1; save(); dDirty=false;
+  S.deck={...D}; S.etypes=[...DE]; S.st.saved=1; save(); dDirty=false; uploadDeck();
   await alertBox('덱 저장 완료! 🃏');
 }
 async function leaveDeck(){
@@ -1295,6 +1323,49 @@ function renderPackOpen(){
     ${all?`<button class="btn gold" ${S.cr<PACK_COST?'disabled':''} onclick="buyPack()">한 팩 더 (💎 ${PACK_COST})</button><button class="btn gray" onclick="renderPackHome()">확인</button>`:'<button class="btn gray" onclick="packCards.forEach(p=>p.open=true);renderPackOpen()">모두 열기</button>'}`;
 }
 function flipCard(i){ const p=packCards[i]; if(!p.open){ p.open=true; renderPackOpen(); } else cardInfo(p.c.id); }
+
+// ================= 실전 순위 (친구들이 실제로 쓰는 카드) =================
+// 덱은 이름 없이 익명 번호로만 저장: 타디777 Firebase의 party/_pocket/decks/<번호>
+const USAGE_DB='https://tower-defense-777-default-rtdb.asia-southeast1.firebasedatabase.app/party/_pocket';
+const USAGE_DAYS=30;   // 최근 며칠 동안 쓴 덱만 셀지
+function uploadDeck(){
+  try{ fetch(`${USAGE_DB}/decks/${S.pid}.json`,{method:'PUT',body:JSON.stringify({t:Date.now(),d:S.deck,e:S.etypes})}).catch(()=>{}); }catch(e){}
+}
+let uTab='poke', uData=null;
+async function openUsage(){
+  show('usage'); uData=null; $('#usageSub').textContent='불러오는 중…'; $('#usageList').innerHTML=''; renderUsageTabs();
+  try{
+    const r=await fetch(`${USAGE_DB}/decks.json`); const all=await r.json()||{};
+    const since=Date.now()-USAGE_DAYS*864e5;
+    uData=Object.values(all).filter(x=>x&&x.d&&x.t>=since);
+  }catch(e){ $('#usageSub').textContent='인터넷 연결을 확인해 줘 😢'; return; }
+  renderUsage();
+}
+function renderUsageTabs(){
+  $('#utabs').innerHTML=[['poke','포켓몬'],['trainer','트레이너'],['magic','마법'],['trap','함정'],['etype','에너지 타입']]
+    .map(([k,l])=>`<button class="tab${uTab===k?' on':''}" onclick="uTab='${k}';renderUsageTabs();renderUsage()">${l}</button>`).join('');
+}
+function renderUsage(){
+  if(!uData) return;
+  const n=uData.length;
+  $('#usageSub').innerHTML=`최근 ${USAGE_DAYS}일 · 플레이어 <b>${n}명</b>의 덱 기준`;
+  if(!n){ $('#usageList').innerHTML='<p class="uempty">아직 데이터가 없어. 대전을 하거나 덱을 저장하면 여기에 올라가!</p>'; return; }
+  let rows=[];
+  if(uTab==='etype'){
+    const cnt={}; for(const x of uData) for(const t of (x.e||[])) cnt[t]=(cnt[t]||0)+1;
+    rows=Object.entries(cnt).filter(([t])=>T[t]).map(([t,k])=>({pct:k/n*100,html:`<span class="ueorb">${eIco(t,1)}</span>`,name:T[t].n+' 에너지',sub:'자동 에너지로 고른 비율'}));
+  }else{
+    const use={}, cop={};
+    for(const x of uData) for(const [id,k] of Object.entries(x.d)){ const c=C[id]; if(!c||!k||catOf(c)!==uTab) continue; use[id]=(use[id]||0)+1; cop[id]=(cop[id]||0)+k; }
+    rows=Object.keys(use).map(id=>({id,pct:use[id]/n*100,avg:cop[id]/use[id],html:handCardHTML(C[id]),name:C[id].name,
+      sub:`평균 ${(cop[id]/use[id]).toFixed(1)}장${C[id].gx?' · GX':''}${C[id].legend?' · ★전설':''}`}));
+  }
+  rows.sort((a,b)=>b.pct-a.pct||(b.avg||0)-(a.avg||0));
+  $('#usageList').innerHTML=rows.map((r,i)=>`<div class="urow"${r.id?` onclick="cardInfo('${r.id}')"`:''}>
+    <span class="urank${i<3?' top3':''}">${i<3?['🥇','🥈','🥉'][i]:i+1}</span>${r.html}
+    <div class="uinf"><b>${r.name}</b><div class="usub2">${r.sub}</div><div class="ubar"><i style="width:${r.pct}%"></i></div></div>
+    <span class="upct">${r.pct.toFixed(1)}%</span></div>`).join('')||'<p class="uempty">이 종류는 아직 쓴 사람이 없어</p>';
+}
 
 // ================= 미션 =================
 function openMissions(){ show('missions'); renderMissions(); }
