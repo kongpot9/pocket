@@ -479,6 +479,7 @@ X('brock','trainer','웅','🪨',1,'내 포켓몬 1마리의 HP를 50 회복한�
 X('misty','trainer','이슬','🌊',2,'내 물 포켓몬 1마리에게 💧에너지를 2개 붙인다.');
 X('rocket','trainer','로켓단','🚀',3,'상대 배틀 포켓몬을 상대 벤치 포켓몬과 강제로 바꾼다. (내가 고름)');
 X('gary','trainer','그린','😎',3,'이번 턴, 내 포켓몬 기술 데미지 +30.');
+X('kiawe','trainer','키아웨','🔥',3,'패를 전부 버린다. 그 후 버린 패의 장수 +3장을 뽑는다.',{img:'sm3/116'});
 X('mallow','trainer','마오','🍲',3,'패를 2장 버리고 발동한다. 덱에서 원하는 카드 2장을 패에 넣는다.',{img:'sm2/127'});
 // --- 마법 (도구 카드, 여러 장 가능) ---
 X('switch','magic','교체','🔄',1,'내 배틀 포켓몬을 벤치 포켓몬과 바꾼다.');
@@ -778,6 +779,7 @@ function canUse(si,c){
     case 'rocket': return !!o.active&&o.bench.length>0;
     case 'gary': case 'xattack': return true;
     case 'mallow': return s.hand.filter(x=>x!==c).length>=2&&s.deck.length>0;
+    case 'kiawe': return s.deck.length>0;
     case 'switch': return !!s.active&&s.bench.length>0;
     case 'pokeball': return s.deck.some(isBasic);
     case 'candy': return candyTargets(s).length>0;
@@ -887,6 +889,7 @@ async function useCard(si,c){
     case 'misty': tgt.energy.push({t:'W'},{t:'W'}); break;
     case 'rocket': { const i=o.bench.indexOf(tgt); o.active.status=null; o.bench[i]=o.active; o.active=tgt; log(`${jo(tgt.c.name,'이','가')} 끌려 나왔다!`); break; }
     case 'gary': s.bonus+=30; break;
+    case 'kiawe': { const n=s.hand.length; s.discard.push(...s.hand); s.hand=[]; draw(s,n+3); log(`${s.name}: 패 ${n}장을 버리고 ${n+3}장을 뽑았다!`); break; }
     case 'mallow': { const got=await pickCards(si,s.deck.slice(),2,'🍲 마오: 덱에서 가져올 카드 2장을 골라',x=>searchValue(s,x),false);
       for(const x of got){ s.deck.splice(s.deck.indexOf(x),1); s.hand.push(x); } shuffle(s.deck);
       log(`${s.name}: 덱에서 ${got.length}장을 가져왔다`); break; }
@@ -1054,6 +1057,7 @@ function aiPickTrainer(si){
     const m=s.active, ok=o.bench.some(b=>m.c.atks.some(a=>canPay([...m.energy,{t:s.curE||'C'}],a.cost)&&calcDmg(s,m,a,b,false)>=b.c.hp-b.dmg));
     if(ok) return has('rocket');
   }
+  if(has('kiawe')&&s.hand.length<=4) return has('kiawe');
   if(has('mallow')&&s.hand.length>=4&&s.deck.some(x=>searchValue(s,x)>=15)) return has('mallow');
   if(has('oak')&&s.hand.length<=3) return has('oak');
   if(has('ash')&&s.hand.length<=8) return has('ash');
