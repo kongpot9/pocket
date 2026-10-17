@@ -411,7 +411,8 @@ P('magikarp','잉어킹',129,'W',30,0,null,1,1,[['튀어오르기','C',0],['몸�
 P('gyarados','갸라도스',130,'W',160,1,'잉어킹',3,3,[['물기','W',30],['폭포오르기','WC',70],['파괴광선','WWC',130]]);
 P('gyaradosgx','갸라도스GX',130,'W',230,1,'잉어킹',4,3,[['물기','W',40],['아쿠아테일','WC',90],['하이드로펌프','WWC',150]],{gx:['해일GX','WWC',200,{benchAll:20}]});
 P('psyduck','고라파덕',54,'W',70,0,null,1,1,[['머리박기','C',10],['물튀기기','WC',30],['염동력','WWC',50,{para:'coin'}]]);
-P('golduck','골덕',55,'W',100,1,'고라파덕',2,1,[['물대포','W',20],['사이코샷','WC',50,{para:'coin'}],['하이드로펌프','WWC',90]]);
+P('golduck','골덕',55,'W',100,1,'고라파덕',2,1,[['물대포','W',20],['사이코샷','WC',50,{para:'coin'}],['하이드로펌프','WWC',90]],
+  {abil:{id:'sseuk',name:'쓱쓱',txt:'내 턴마다 1번, 벤치에 있는 물 또는 노말(무색) 타입 포켓몬 1마리에게 💧물 에너지를 1개 붙일 수 있다.'}});
 P('articuno','프리져',144,'W',130,0,null,4,2,[['얼음뭉치','W',30],['냉동빔','WC',60,{para:'coin'}],['눈보라','WWC',100,{benchAll:10}]],{legend:1});
 // --- 전기 ---
 P('pikachu','피카츄',25,'L',60,0,null,1,1,[['전기쇼크','L',10,{para:'coin'}],['전광석화','LC',30],['10만볼트','LLC',60]]);
@@ -915,6 +916,7 @@ async function retreat(si){
 function canAbility(si,m){
   const s=G.p[si]; if(!m||!m.c.abil||G.phase!=='play'||G.cur!==si||m.abilTurn===G.turnNo) return false;
   if(m.c.abil.id==='coinslot') return s.active===m;
+  if(m.c.abil.id==='sseuk') return s.bench.some(x=>x.c.type==='W'||x.c.type==='C');
   return false;
 }
 async function useAbility(si,m){
@@ -923,6 +925,11 @@ async function useAbility(si,m){
     const t=await pickMon(si,mons(s),'⭐노말 에너지를 붙일 포켓몬을 골라',x=>energyScore(s,x,'C')+(x===s.active?1:0)); if(!t) return false;
     t.energy.push({t:'C'}); m.abilTurn=G.turnNo;
     log(`✨ ${m.c.name}의 코인 슬롯! ⭐에너지 → ${t.c.name}`); render(); await banner(`✨ 코인 슬롯! 🪙`,700);
+  }
+  if(m.c.abil.id==='sseuk'){
+    const t=await pickMon(si,s.bench.filter(x=>x.c.type==='W'||x.c.type==='C'),'💧에너지를 붙일 벤치 포켓몬을 골라 (물·노말)',x=>energyScore(s,x,'W')); if(!t) return false;
+    t.energy.push({t:'W'}); m.abilTurn=G.turnNo;
+    log(`✨ ${m.c.name}의 쓱쓱! 💧에너지 → ${t.c.name}`); render(); await banner(`✨ 쓱쓱! 💧`,700);
   }
   return true;
 }
