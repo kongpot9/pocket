@@ -457,6 +457,7 @@ P('skarmory','무장조',227,'M',90,0,null,2,1,[['쪼기','M',20],['강철날개
 // --- 무색 ---
 P('rattata','꼬렛',19,'C',40,0,null,1,0,[['필살앞니','C',10],['물기','CC',20],['분노의앞니','CCC',40]]);
 P('raticate','레트라',20,'C',80,1,'꼬렛',1,1,[['필살앞니','C',20],['물기','CC',50],['분노의앞니','CCC',80]]);
+P('raticategx','레트라GX',20,'C',200,1,'꼬렛',4,1,[['필살앞니','C',30],['분노의앞니','CC',70],['하이퍼앞니','CCC',120]],{gx:['앵그리파우치GX','CCC',40,{perESelf:40}]});
 P('meowth','나옹',52,'C',60,0,null,3,1,[['할퀴기','C',10],['고양이돈받기','CC',20,{draw:1}],['마구할퀴기','CCC',40]],
   {abil:{id:'coinslot',name:'코인 슬롯',txt:'이 포켓몬이 배틀 자리에 있으면, 내 턴마다 1번 ⭐노말 에너지를 내 포켓몬 1마리에게 붙일 수 있다.'}});
 P('eevee','이브이',133,'C',60,0,null,1,1,[['몸통박치기','C',10],['전광석화','CC',30],['비밀의힘','CCC',50]]);
@@ -565,6 +566,7 @@ function show(id){ document.querySelectorAll('.screen').forEach(s=>s.classList.t
 
 function effText(e){ if(!e) return ''; const o=[];
   if(e.perBench) o.push(`내 벤치의 같은 타입 포켓몬 수 × ${e.perBench} 추가`);
+  if(e.perESelf) o.push(`이 포켓몬에게 붙은 에너지 1개마다 ${e.perESelf} 추가`);
   if(e.coinPlus) o.push(`동전 앞면이면 ${e.coinPlus} 추가`);
   if(e.heal) o.push(`자신의 HP를 ${e.heal} 회복`);
   if(e.healTeam) o.push(`내 포켓몬 전원 HP ${e.healTeam} 회복`);
@@ -588,6 +590,7 @@ const KTAG={trainer:['TRAINER','트레이너','#ee7d12','#ffe2c2','트레이너 
   trap:['TRAP','함정','#c2185b','#fbd6e5','상대 턴에 조건이 되면 패에서 발동한다. 상대 턴마다 1장.']};
 let CNUM=null;
 function cardNo(c){ if(!CNUM){ CNUM={}; let i=0; for(const x of CARDS) if(x.kind!=='energy') CNUM[x.id]=++i; CNUM.total=i; } return CNUM[c.id]?`${CNUM[c.id]}/${CNUM.total}`:''; }
+const dmgTxt=a=>a.dmg?a.dmg+(a.eff&&(a.eff.perESelf||a.eff.perBench||a.eff.coinPlus)?'+':''):'';
 const gxName=n=>n.endsWith('GX')?`${n.slice(0,-2)}<i class="gxlogo">GX</i>`:n;
 const footHTML=c=>`<div class="pc-foot"><span>Illus. 구예준 스튜디오</span><span>${cardNo(c)} <span class="rar">${rarTxt(c.rar)}</span></span></div>`;
 function bigCardHTML(c,m){
@@ -595,7 +598,7 @@ function bigCardHTML(c,m){
     const prev=c.from?BYNAME[c.from]:null, dark=c.type==='D';
     const atks=c.atks.map(a=>{
       const tx=(a.gx?'GX 기술은 한 판에 1번만 쓸 수 있다.'+(a.eff?' ':''):'')+effText(a.eff);
-      return `<div class="pa${a.gx?' gxa':''}"><span class="pc-cost">${costHTML(a.cost)}</span><span class="pa-n">${gxName(a.name)}</span><span class="pa-d">${a.dmg||''}</span>${tx?`<div class="pa-t">${tx}</div>`:''}</div>`;}).join('');
+      return `<div class="pa${a.gx?' gxa':''}"><span class="pc-cost">${costHTML(a.cost)}</span><span class="pa-n">${gxName(a.name)}</span><span class="pa-d">${dmgTxt(a)}</span>${tx?`<div class="pa-t">${tx}</div>`:''}</div>`;}).join('');
     if(c.img) return `<div class="pc real${c.gx?' gx':''}${dark?' dark':''}" style="--bg:${typeBg(c.type)}">
       <div class="rtop" style="background-image:url(${CARDIMG(c.img,1)})"></div><div class="in rbot">
       <div class="pc-body">${c.abil?`<div class="pab"><span class="abtag">특성</span><b>${c.abil.name}</b><div class="pa-t">${c.abil.txt}</div></div>`:''}${atks}</div>
@@ -629,7 +632,7 @@ function bigCardHTML(c,m){
 function handCardHTML(c,dim){
   const d=dim?' dim':'', u=`data-uid="${c.uid||''}" data-id="${c.id}"`;
   if(c.kind==='poke'&&c.img) return `<div class="hc real${c.gx?' gx':''}${d}" ${u}><div class="rcrop" style="background-image:url(${CARDIMG(c.img)})"></div>
-    <div class="rmini" style="--bg:${typeBg(c.type)}">${c.atks.map(a=>`<div><span>${costHTML(a.cost)}</span><b>${a.dmg||''}</b></div>`).join('')}</div></div>`;
+    <div class="rmini" style="--bg:${typeBg(c.type)}">${c.atks.map(a=>`<div><span>${costHTML(a.cost)}</span><b>${dmgTxt(a)}</b></div>`).join('')}</div></div>`;
   if(c.kind==='poke') return `<div class="hc${c.gx?' gx':''}${c.type==='D'?' dark':''}${d}" ${u} style="--bg:${typeBg(c.type)}"><div class="in">
     <div class="nm"><span>${c.name}</span><b>${c.hp}</b></div><div class="art"><img src="${ART(c.dex)}" loading="lazy" onerror="this.style.visibility='hidden'"></div>
     <div class="kd">${STAGE[c.stage]}${c.gx?' · GX':''}${c.legend?' ★':''}</div></div></div>`;
@@ -791,8 +794,9 @@ function canUse(si,c){
 }
 function calcDmg(s,m,atk,def,head){
   if(!def) return 0; const e=atk.eff||{}; let d=atk.dmg;
-  if(d<=0&&!e.perBench) return 0;
+  if(d<=0&&!e.perBench&&!e.perESelf) return 0;
   if(e.perBench) d+=s.bench.filter(x=>x.c.type===m.c.type).length*e.perBench;
+  if(e.perESelf) d+=m.energy.length*e.perESelf;
   if(e.coinPlus&&head) d+=e.coinPlus;
   d+=s.bonus;
   if(def.c.weak===m.c.type) d+=WEAK_BONUS;
