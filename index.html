@@ -273,6 +273,10 @@ button{font:inherit;color:inherit;border:0;cursor:pointer;background:none}
 .ueorb{width:48px;display:flex;justify-content:center}
 .ueorb .eico{width:36px;height:36px;font-size:20px}
 .uempty{color:var(--sub);text-align:center;padding:30px 10px;line-height:1.6}
+.pc.real.gx:not(.dark) .pc-body{color:#151515;text-shadow:none}
+.pc.real.gx:not(.dark) .pc-body .pa.gxa{color:#fff;text-shadow:0 1px 2px #000}
+.pc.real.gx:not(.dark) .pa+.pa{border-top-color:rgba(0,0,0,.14)}
+.pc.real.gx:not(.dark) .pc-foot{color:rgba(0,0,0,.7)}
 </style>
 </head>
 <body>
@@ -474,6 +478,7 @@ const CARDIMG=(k,big)=>`https://images.pokemontcg.io/${k}${big?'_hires':''}.png`
 for(const [id,[k,hp,t]] of Object.entries(REAL)){ const c=C[id]; if(!c) continue;
   if(c.type!==t){ for(const a of c.atks) a.cost=a.cost.split(c.type).join(t); c.type=t; c.weak=WEAK[t]; }
   c.img=k; c.hp=hp; }
+C.raticategx.img='sm7/85'; // 알로라 레트라GX 그림 (게임에서는 노말 타입 그대로 — 나옹·골덕 특성이랑 같이 쓰라고)
 // --- 트레이너 (사람 카드, 턴에 1장) ---
 X('ash','trainer','지우','🧢',2,'카드를 3장 뽑는다.');
 X('oak','trainer','오박사','👴',2,'패를 모두 덱에 섞고 6장 뽑는다.');
